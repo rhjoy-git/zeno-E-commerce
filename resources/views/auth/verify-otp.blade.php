@@ -19,21 +19,16 @@
             <input type="hidden" name="email" value="{{ $email }}">
 
             <div class="mb-4">
-                <x-auth.input id="otp" name="otp" type="text" label="OTP Verification" required />
+                <x-auth.input id="otp" name="otp" type="text" label="OTP Verification" required />             
             </div>
 
             <x-auth.button>
                 Verify OTP
             </x-auth.button>
             <div class="text-right font-semibold text-xs">
-                <a href="#" onclick="event.preventDefault(); document.getElementById('resend-form').submit();"
-                    class="text-blue-600 hover:underline">
+                <a href="{{ route('otp.resend', ['email' => $email]) }}" class="text-blue-600 hover:underline">
                     Resend OTP
                 </a>
-                <form id="resend-form" action="{{ route('otp.resend', ['email' => $email]) }}" method="POST"
-                    class="hidden">
-                    @csrf
-                </form>
             </div>
 
         </form>

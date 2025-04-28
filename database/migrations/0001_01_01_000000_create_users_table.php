@@ -19,6 +19,9 @@ return new class extends Migration
             $table->string('password');
             $table->string('otp')->nullable();
             $table->timestamp('otp_expires_at')->nullable();
+            $table->unsignedTinyInteger('otp_attempts')->default(0);
+            $table->timestamp('otp_last_attempt')->nullable();
+            $table->timestamp('otp_blocked_until')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

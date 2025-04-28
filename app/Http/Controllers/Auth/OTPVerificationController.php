@@ -18,7 +18,6 @@ class OTPVerificationController extends Controller
 
     public function resendOtp(Request $request, $email)
     {
-
         try {
             $user = User::where('email', $email)->firstOrFail();
             $otpService = new OtpService();
@@ -40,7 +39,7 @@ class OTPVerificationController extends Controller
         try {
             $user = User::where('email', $request->email)->firstOrFail();
             $otpService = new OtpService();
-            // Check if user is blocked
+
             if ($otpService->verifyOtp($user, $request->otp)) {
                 // Clear OTP data
                 $user->update([
