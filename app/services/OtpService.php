@@ -11,7 +11,7 @@ use Exception;
 class OtpService
 {
     const MAX_ATTEMPTS = 5;
-    const BLOCK_MINUTES = 10;
+    const BLOCK_MINUTES = 5;
 
     public function generateAndSendOtp(User $user)
     {
