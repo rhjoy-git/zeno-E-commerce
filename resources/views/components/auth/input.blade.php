@@ -33,8 +33,11 @@ $id = $id ?? $name;
     $class
     ])
     >
-
-    @error($name)
-    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-    @enderror
+    @if ($errors->has($name))  
+        <div class="text-red-500 text-xs mt-1">  
+            @foreach ($errors->get($name) as $error)  
+                <p>{{ $error }}</p>  
+            @endforeach  
+        </div>  
+    @endif  
 </div>

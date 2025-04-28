@@ -27,18 +27,5 @@
             {{ $slot }}
         </div>
     </div>
-    {{-- ============= Show Error ================ --}}
-    @if ($errors->any())
-    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-        <div class="text-red-700">
-            <p class="font-bold">Error</p>
-            <ul class="list-disc list-inside text-sm">
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    </div>
-    @endif
 
 </div>
