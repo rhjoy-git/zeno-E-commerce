@@ -15,9 +15,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => bcrypt('12345678'),
             'otp' => '0000',
-            'phone' => fake()->phoneNumber(),
-            'address' => fake()->address(),
-            'city' => fake()->city(),
+            'role_id' => 2,
         ];
     }
 }
