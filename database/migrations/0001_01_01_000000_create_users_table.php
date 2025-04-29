@@ -22,6 +22,8 @@ return new class extends Migration
             $table->unsignedTinyInteger('otp_attempts')->default(0);
             $table->timestamp('otp_last_attempt')->nullable();
             $table->timestamp('otp_blocked_until')->nullable();
+            $table->unsignedSmallInteger('otp_requests_today')->default(0);
+            $table->date('last_otp_request_date')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

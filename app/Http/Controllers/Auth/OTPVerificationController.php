@@ -8,12 +8,34 @@ use App\Models\User;
 use App\Services\OtpService;
 use Illuminate\Support\Facades\Auth;
 use Exception;
+use App\Http\Middleware\CheckOtpDailyLimit;
 
 class OTPVerificationController extends Controller
 {
     public function showOtpForm($email)
     {
-        return view('auth.verify-otp', ['email' => $email]);
+        $user = User::where('email', $email)
+            ->select('id', 'email', 'otp', 'otp_expires_at', 'otp_blocked_until')
+            ->firstOrFail();
+
+        // Check if OTP was already verified
+        if ($user->otp === null) {
+            return redirect()->route('login')->with('error', 'OTP already verified.');
+        }
+
+        // Check if user is blocked from resending
+        if ($user->otp_blocked_until && now()->lt($user->otp_blocked_until)) {
+            $remaining = now()->diffInMinutes($user->otp_blocked_until);
+            return redirect()->back()->with('error', "Too many attempts. Try again in {$remaining} minutes.");
+        }
+        // Convert to Carbon if it's a string
+        if (is_string($user->otp_expires_at)) {
+            $user->otp_expires_at = \Carbon\Carbon::parse($user->otp_expires_at);
+        }
+        return view('auth.verify-otp', [
+            'user' => $user,
+            'remainingSeconds' => now()->diffInSeconds($user->otp_expires_at)
+        ]);
     }
 
     public function resendOtp(Request $request, $email)

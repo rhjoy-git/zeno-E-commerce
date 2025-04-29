@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\User;
 
 class LoginController extends Controller
 {
@@ -45,7 +46,6 @@ class LoginController extends Controller
     }
     protected function redirectPath()
     {
-        // Customize default redirect path after login
         return route('/');
     }
 

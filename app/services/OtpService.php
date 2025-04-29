@@ -12,25 +12,54 @@ class OtpService
 {
     const MAX_ATTEMPTS = 5;
     const BLOCK_MINUTES = 5;
+    const MAX_DAILY_OTP = 5;
+    const OTP_EXPIRE_MINUTES = 10;
 
     public function generateAndSendOtp(User $user)
     {
-        // Check if user is blocked
+        //   Check daily OTP limit
+        $this->checkDailyOtpLimit($user);
+        //  Check if user is blocked
         if ($this->isUserBlocked($user)) {
-            throw new Exception("Too many attempts. Try again after " . self::BLOCK_MINUTES . " minutes.");
+            $remaining = now()->diffInMinutes($user->otp_blocked_until);
+            throw new Exception("Try again in {$remaining} minutes.");
         }
-
-        $otp = rand(100000, 999999); // 6-digit OTP
+        //  Check if active OTP exists
+        if ($this->hasActiveOtp($user)) {
+            $remaining = now()->diffInSeconds($user->otp_expires_at);
+            throw new Exception("Please wait until current OTP expires.");
+        }
+        $otp = rand(100000, 999999);
 
         $user->update([
             'otp' => $otp,
-            'otp_expires_at' => Carbon::now()->addMinutes(10),
-            'otp_attempts' => 0 // Reset attempts on new OTP
+            'otp_expires_at' => now()->addMinutes(self::OTP_EXPIRE_MINUTES),
+            'otp_attempts' => 0,
+            'otp_requests_today' => $user->otp_requests_today + 1,
+            'last_otp_request_date' => now()->toDateString()
         ]);
 
-        Mail::to($user->email)->queue(new OtpMail($otp));
+        // Send OTP email
+        Mail::to($user->email)->send(new OtpMail($otp));
+    }
 
-        return $otp;
+    protected function checkDailyOtpLimit(User $user)
+    {
+        if ($user->last_otp_request_date != today()->toDateString()) {
+            $user->update([
+                'otp_requests_today' => 0,
+                'last_otp_request_date' => today()
+            ]);
+            return;
+        }
+        if ($user->otp_requests_today >= self::MAX_DAILY_OTP) {
+            throw new Exception("Maximum OTP requests reached for today.");
+        }
+    }
+
+    protected function hasActiveOtp(User $user)
+    {
+        return $user->otp_expires_at && now()->lt($user->otp_expires_at);
     }
 
     public function verifyOtp(User $user, $enteredOtp)
@@ -58,7 +87,6 @@ class OtpService
         $this->resetAttempts($user);
         return true;
     }
-
     protected function isUserBlocked(User $user)
     {
         return $user->otp_blocked_until &&
@@ -71,7 +99,6 @@ class OtpService
             'otp_blocked_until' => Carbon::now()->addMinutes(self::BLOCK_MINUTES)
         ]);
     }
-
     protected function resetAttempts(User $user)
     {
         $user->update([
@@ -81,5 +108,4 @@ class OtpService
             'otp_blocked_until' => null
         ]);
     }
-    
 }

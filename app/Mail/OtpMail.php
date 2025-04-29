@@ -10,16 +10,11 @@ class OtpMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $otp;
-
-    public function __construct($otp)
-    {
-        $this->otp = $otp;
-    }
+    public function __construct(public string $otp) {}
 
     public function build()
     {
-        return $this->subject('Your OTP Code')
-                   ->view('emails.otp');
+        return $this->markdown('emails.otp')
+            ->subject('Your ' . config('app.name') . ' Verification Code');
     }
 }

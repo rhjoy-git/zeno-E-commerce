@@ -14,7 +14,8 @@
                 <span class="ml-2">Remember me</span>
             </label>
 
-            <a href="" class="text-sm text-indigo-600 hover:text-indigo-800 font-semibold">
+            <a href="{{ route('password.request') }}"
+                class="text-sm text-indigo-600 hover:text-indigo-800 font-semibold">
                 Forgot Password?
             </a>
         </div>

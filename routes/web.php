@@ -7,6 +7,8 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\OTPVerificationController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
 
 Route::get('/', function () {
     return view('home');
@@ -22,16 +24,26 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login']);
 
-    // Password Reset Routes
-    Route::get('/password/reset', [LoginController::class, 'showResetForm'])->name('password.request');
+    // Password Reset Links
+    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
+        ->name('password.request');
+
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->name('password.email');
+
+    // Password Reset
+    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
+        ->name('password.reset');
+
+    Route::post('/reset-password', [NewPasswordController::class, 'store'])
+        ->name('password.update');
 
     // OTP Verification Routes
     Route::get('/otp/verify/{email}', [OTPVerificationController::class, 'showOtpForm'])->name('otp.verify');
     Route::post('/otp/verify', [OTPVerificationController::class, 'verifyOtp'])->name('otp.verify.post');
     Route::post('/otp/resend/{email}', [OTPVerificationController::class, 'resendOtp'])->name('otp.resend');
     // Optional: If you need a GET version for testing
-    Route::get('/otp/resend/{email}', [OTPVerificationController::class, 'resendOtp'])
-        ->name('otp.resend.get');
+    Route::get('/otp/resend/{email}', [OTPVerificationController::class, 'resendOtp'])->name('otp.resend.get');
 });
 
 // Customer Routes

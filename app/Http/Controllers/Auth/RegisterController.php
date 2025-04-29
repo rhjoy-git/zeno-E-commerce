@@ -30,8 +30,8 @@ class RegisterController extends Controller
 
             // Create user without logging in yet
             $user = User::create([
-                'name' => $validated['name'],
-                'email' => strtolower($validated['email']),
+                'name' => trim($validated['name']),
+                'email' => strtolower(trim($validated['email'])),
                 'password' => Hash::make($validated['password']),
                 'role_id' => Role::where('slug', 'customer')->first()->id
             ]);
@@ -39,7 +39,6 @@ class RegisterController extends Controller
             // Generate and send OTP
             $otpService = new OtpService();
             $otpService->generateAndSendOtp($user);
-
             DB::commit();
 
             // Redirect to OTP verification page

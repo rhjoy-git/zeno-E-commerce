@@ -33,11 +33,14 @@ $id = $id ?? $name;
     $class
     ])
     >
-    @if ($errors->has($name))  
-        <div class="text-red-500 text-xs mt-1">  
-            @foreach ($errors->get($name) as $error)  
-                <p>{{ $error }}</p>  
-            @endforeach  
-        </div>  
-    @endif  
+    @if ($errors->has($name))
+    @php
+    $errorCollection = collect($errors->get($name))->unique();
+    @endphp
+    <div class="text-red-500 text-xs mt-1">
+        @foreach ($errorCollection as $error)
+        <p>{{ $error }}</p>
+        @endforeach
+    </div>
+    @endif
 </div>

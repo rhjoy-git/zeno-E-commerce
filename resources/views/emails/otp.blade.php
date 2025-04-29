@@ -1,14 +1,18 @@
 @component('mail::message')
 # Your OTP Code
 
-Your one-time password is: **{{ $otp }}**
+Your one-time verification code is:  
+**{{ $otp }}**
 
-This code will expire in 10 minutes.
+@component('mail::panel')
+This code will expire in **10 minutes**  
+Please use it before {{ now()->addMinutes(10)->format('h:i A') }}
+@endcomponent
 
 @component('mail::button', ['url' => config('app.url')])
-Visit Site
+Visit {{ config('app.name') }}
 @endcomponent
 
 Thanks,<br>
-{{ config('app.name') }}
+{{ config('app.name') }} Team
 @endcomponent
