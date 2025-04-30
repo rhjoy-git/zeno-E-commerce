@@ -39,8 +39,7 @@
 
             <div class="mb-4 text-center text-sm text-gray-600">
                 @if($user->otp_expires_at)
-                Expires at: {{ \Carbon\Carbon::parse($user->otp_expires_at)->format('h:i A') }}
-                ({{ \Carbon\Carbon::parse($user->otp_expires_at)->diffForHumans() }})
+                Expires in: <span id="countdown" class="text-rose-600"></span>
                 @endif
             </div>
 
@@ -64,25 +63,38 @@
 
 @if($user->otp_expires_at)
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    const expiryTime = new Date("{{ $user->otp_expires_at }}").getTime();
-    const resendButton = document.querySelector('[type="submit"][formaction*="resend"]');
-    
-    function updateTimer() {
-        const now = Date.now();
-        const remaining = Math.max(0, Math.floor((expiryTime - now) / 1000));
-        
-        if (remaining <= 0) {
-            if (resendButton) resendButton.disabled = false;
-            return;
+    document.addEventListener('DOMContentLoaded', function () {
+        const expiryTime = new Date("{{ \Carbon\Carbon::parse($user->otp_expires_at)->format('Y-m-d H:i:s') }}").getTime();
+        const countdownDisplay = document.getElementById('countdown');
+        const resendBtn = document.querySelector('form[action*="resend"] button');
+
+        function updateCountdown() {
+            const now = Date.now();
+            const remaining = Math.floor((expiryTime - now) / 1000);
+
+            if (remaining <= 0) {
+                countdownDisplay.textContent = '00:00';
+
+                // Enable resend button
+                resendBtn.disabled = false;
+                resendBtn.classList.remove('text-gray-400', 'cursor-not-allowed');
+                resendBtn.classList.add('text-indigo-600', 'hover:text-indigo-800');
+                return;
+            }
+
+            const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
+            const seconds = String(remaining % 60).padStart(2, '0');
+            countdownDisplay.textContent = `${minutes}:${seconds}`;
+
+            // Disable resend button
+            resendBtn.disabled = true;
+            resendBtn.classList.remove('text-indigo-600', 'hover:text-indigo-800');
+            resendBtn.classList.add('text-gray-400', 'cursor-not-allowed');
+
+            setTimeout(updateCountdown, 1000);
         }
-        
-        if (resendButton) resendButton.disabled = true;
-        setTimeout(updateTimer, 1000);
-    }
-    
-    updateTimer();
-});
+
+        updateCountdown();
+    });
 </script>
 @endif
-@endsection

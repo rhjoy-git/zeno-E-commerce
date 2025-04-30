@@ -13,7 +13,7 @@ class OtpService
     const MAX_ATTEMPTS = 5;
     const BLOCK_MINUTES = 5;
     const MAX_DAILY_OTP = 5;
-    const OTP_EXPIRE_MINUTES = 10;
+    private const OTP_EXPIRE_MINUTES = 3;
 
     public function generateAndSendOtp(User $user)
     {
@@ -105,7 +105,8 @@ class OtpService
             'otp' => null,
             'otp_expires_at' => null,
             'otp_attempts' => 0,
-            'otp_blocked_until' => null
+            'otp_blocked_until' => null,
+            'email_verified_at' => now()
         ]);
     }
 }

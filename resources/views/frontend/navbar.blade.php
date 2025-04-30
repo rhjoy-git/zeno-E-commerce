@@ -2,7 +2,8 @@
     isMobileMenuOpen: false, 
     searchOpen: false,
     activeMenu: null,
-    activeSubmenu: null 
+    activeSubmenu: null,
+    activeUser: false
 }" class="bg-white shadow-lg sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Search Bar Overlay -->
@@ -117,22 +118,22 @@
                             <h3 class="font-semibold text-gray-900 text-lg mb-4">Top Brands</h3>
                             <div class="grid grid-cols-2 gap-3">
                                 <a href="#"
-                                    class="p-1 bg-gray-50 hover:bg-gray-100 rounded-lg flex items-center justify-center">
+                                    class="p-1 bg-gray-50 hover:text-indigo-600 hover:bg-gray-100 rounded-lg flex items-center justify-center">
                                     <img src="{{ asset('images/nike.png') }}"
                                         class="h-10 w-fit object-contain scale-150" alt="Nike">
                                 </a>
                                 <a href="#"
-                                    class="p-1 bg-gray-50 hover:bg-gray-100 rounded-lg flex items-center justify-center">
+                                    class="p-1 bg-gray-50 hover:text-indigo-600 hover:bg-gray-100 rounded-lg flex items-center justify-center">
                                     <img src="{{ asset('images/adidas.png') }}"
                                         class="h-10 w-fit object-contain scale-150" alt="Adidas">
                                 </a>
                                 <a href="#"
-                                    class="p-1 bg-gray-50 hover:bg-gray-100 rounded-lg flex items-center justify-center">
+                                    class="p-1 bg-gray-50 hover:text-indigo-600 hover:bg-gray-100 rounded-lg flex items-center justify-center">
                                     <img src="{{ asset('images/puma.png') }}"
                                         class="h-10 w-fit object-contain scale-150" alt="Puma">
                                 </a>
                                 <a href="#"
-                                    class="p-1 bg-gray-50 hover:bg-gray-100 rounded-lg flex items-center justify-center">
+                                    class="p-1 bg-gray-50 hover:text-indigo-600 hover:bg-gray-100 rounded-lg flex items-center justify-center">
                                     <img src="{{ asset('images/levis.png') }}"
                                         class="h-10 w-fit object-contain scale-150" alt="Levi's">
                                 </a>
@@ -147,7 +148,7 @@
                                 <h3 class="text-2xl font-bold text-white mb-2">Season Final Sale</h3>
                                 <p class="text-white/90">Up to 60% off selected items</p>
                                 <button
-                                    class="mt-4 bg-white text-gray-900 px-6 py-2 rounded-full w-fit text-sm font-medium hover:bg-gray-100">
+                                    class="mt-4 bg-white text-gray-900 px-6 py-2 rounded-full w-fit text-sm font-medium hover:text-indigo-600 hover:bg-gray-100">
                                     Shop Now
                                 </button>
                             </div>
@@ -156,9 +157,8 @@
                 </div>
             </div>
 
-
             <!-- Right Icons -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-4 relative">
                 <!-- Search Icon -->
                 <button @click="searchOpen = true" class="p-2 text-gray-600 hover:text-indigo-600 md:hidden">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,14 +175,83 @@
                         </svg>
                     </button>
 
-                    <a href="{{ Auth::check() ? "" : route('login') }}" class="p-2 text-gray-600 hover:text-indigo-600"
-                        target="_blank">
+                    <!-- Toggle Button -->
+                    @include('partials.user-dropdown')
+                    {{-- <button @click="activeUser = !activeUser" class="p-2 text-gray-600 hover:text-indigo-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
-                    </a>
+                    </button>
+                    <div x-show="activeUser" @click.away="activeUser = false" x-transition
+                        class="absolute top-3/4 left-0 right-0 w-52 z-20 bg-white shadow-lg rounded-md text-center mx-auto mt-6 overflow-hidden">
+                        @auth
+                        <a href="{{ route('customer.dashboard') }}"
+                            class="flex items-center px-4 py-2 text-sm text-gray-700 hover:text-indigo-600 hover:bg-gray-100 transition-colors duration-200">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                            Dashboard
+                        </a>
+                        <a href="#"
+                            class="flex items-center px-4 py-2 text-sm text-gray-700 hover:text-indigo-600 hover:bg-gray-100 transition-colors duration-200">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            Profile
+                        </a>
+                        <a href="#"
+                            class="flex items-center px-4 py-2 text-sm text-gray-700 hover:text-indigo-600 hover:bg-gray-100 transition-colors duration-200">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                </path>
+                            </svg>
+                            Orders
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit"
+                                class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:text-indigo-600 hover:bg-gray-100 transition-colors duration-200">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                                    </path>
+                                </svg>
+                                Logout
+                            </button>
+                        </form>
+                        @endauth
+                        @guest
+                        <div class="flex justify-center items-center">
+                            <a href="{{ route('login') }}"
+                                class="flex items-center px-4 py-2 text-sm text-gray-700 hover:text-indigo-600 hover:bg-gray-100 transition-colors duration-200">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1">
+                                    </path>
+                                </svg>
+                                Login
+                            </a>
+                            <span class="text-gray-400">|</span>
+                            <a href="{{ route('register') }}"
+                                class="flex items-center px-4 py-2 text-sm text-gray-700 hover:text-indigo-600 hover:bg-gray-100 transition-colors duration-200">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z">
+                                    </path>
+                                </svg>
+                                Register
+                            </a>
+                        </div>
+                        @endguest
+                    </div> --}}
+                    <!-- Dropdown Menu -->
 
+                    <!-- Cart Icon -->
                     <button class="p-2 text-gray-600 hover:text-indigo-600 relative">
                         <svg width="22" height="20" viewBox="0 0 22 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
@@ -193,27 +262,13 @@
                         <span
                             class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
                     </button>
-
+                    <!-- Wishlist Icon -->
                     <button class="p-2 text-gray-600 hover:text-indigo-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                     </button>
-
-                    @auth
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="p-2 text-gray-600 hover:text-indigo-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
-                                </path>
-                            </svg>
-                        </button>
-                    </form>
-                    @endauth
                 </div>
 
                 <!-- Mobile Menu Button -->
@@ -230,11 +285,16 @@
         <!-- Mobile Menu -->
         <div class="md:hidden" x-show="isMobileMenuOpen" @click.away="isMobileMenuOpen = false">
             <div class="px-2 pt-2 pb-3 space-y-1">
-                <a href="#" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 uppercase">Men</a>
-                <a href="#" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 uppercase">Women</a>
-                <a href="#" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 uppercase">Kid</a>
-                <a href="#" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 uppercase">Accessories</a>
-                <a href="#" class="block px-3 py-2 text-red-600 hover:bg-gray-100 uppercase">Sale</a>
+                <a href="#"
+                    class="block px-3 py-2 text-gray-700 hover:text-indigo-600 hover:bg-gray-100 uppercase">Men</a>
+                <a href="#"
+                    class="block px-3 py-2 text-gray-700 hover:text-indigo-600 hover:bg-gray-100 uppercase">Women</a>
+                <a href="#"
+                    class="block px-3 py-2 text-gray-700 hover:text-indigo-600 hover:bg-gray-100 uppercase">Kid</a>
+                <a href="#"
+                    class="block px-3 py-2 text-gray-700 hover:text-indigo-600 hover:bg-gray-100 uppercase">Accessories</a>
+                <a href="#"
+                    class="block px-3 py-2 text-red-600 hover:text-indigo-600 hover:bg-gray-100 uppercase">Sale</a>
             </div>
         </div>
     </div>

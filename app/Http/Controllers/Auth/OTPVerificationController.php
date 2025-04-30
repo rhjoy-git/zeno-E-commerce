@@ -73,7 +73,7 @@ class OTPVerificationController extends Controller
                 // FINALLY LOGIN THE USER HERE
                 Auth::login($user, $request->remember ?? false);
 
-                return redirect()->route('dashboard')
+                return redirect()->route('home')
                     ->with('success', 'Login successful!');
             }
         } catch (\Exception $e) {

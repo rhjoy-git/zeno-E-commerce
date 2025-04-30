@@ -8,17 +8,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
+use App\Models\User;
+
 
 class ProfileController extends Controller
 {
-    public function show(Request $request): View
+    public function showProfile(Request $request): View
     {
-        return view('dashboard', [
+
+        return view('customer.profile', [
             'user' => $request->user(),
         ]);
-        
     }
-    
+
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -29,37 +34,51 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    // public function update(ProfileUpdateRequest $request): RedirectResponse
-    // {
-    //     $request->user()->fill($request->validated());
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
 
-    //     if ($request->user()->isDirty('email')) {
-    //         $request->user()->email_verified_at = null;
-    //     }
+        $validatedData = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            // 'phone' => ['nullable', 'string', 'max:20'],
+            // 'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+        ]);
+        // if ($request->hasFile('avatar')) {
+        //     if ($user->avatar) {
+        //         Storage::delete($user->avatar);
+        //     }
+        //     $path = $request->file('avatar')->store('avatars');
+        //     $validatedData['avatar'] = $path;
+        // }
 
-    //     $request->user()->save();
+        $user->update($validatedData);
 
-    //     return Redirect::route('profile.edit')->with('status', 'profile-updated');
-    // }
+        return redirect()->route('profile')
+            ->with('success', 'Profile updated successfully!');
+    }
 
     /**
      * Delete the user's account.
      */
-    public function destroy(Request $request): RedirectResponse
+    public function updatePassword(Request $request)
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
+        $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        $user = $request->user();
+        // Update password
+        $request->user()->update([
+            'password' => Hash::make($request->password)
+        ]);
 
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        // Regenerate session ID to prevent session fixation
+        $request->session()->regenerate();
+        if (Gate::allows('isAdmin')) {
+            return redirect()->route('admin.dashboard')
+                ->with('success', 'Password updated successfully!');
+        }
+        return redirect()->route('customer.dashboard')
+            ->with('success', 'Password updated successfully!');
     }
 }

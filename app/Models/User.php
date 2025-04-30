@@ -14,6 +14,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'remember_token',
+        'role_id',
         'otp',
         'otp_expires_at',
         'otp_attempts',
@@ -21,7 +23,8 @@ class User extends Authenticatable
         'otp_last_attempt',
         'otp_blocked_until',
         'last_otp_request_date',
-        'otp_requests_today'
+        'otp_requests_today',
+        'email_verified_at',
     ];
     protected $casts = [
         'otp_expires_at' => 'datetime',

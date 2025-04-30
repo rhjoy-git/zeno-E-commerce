@@ -4,7 +4,6 @@
 <x-auth.form-card title="Create Account" subtitle="Join our community today">
     <form method="POST" action="{{ route('register') }}" class="space-y-5">
         @csrf
-
         <x-auth.input name="name" label="Full Name" required />
         <x-auth.input name="email" type="email" label="Email Address" required />
         <x-auth.input name="password" type="password" label="Password" required />

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Gate;
 use App\Models\User;
 
 class LoginController extends Controller
@@ -28,6 +29,11 @@ class LoginController extends Controller
 
             if (Auth::attempt($validated, $remember)) {
                 $request->session()->regenerate();
+                // Log the login attempt
+                if (Gate::allows('isAdmin')) {
+                    return redirect()->route('admin.dashboard')
+                        ->with('success', 'Login successful! Welcome back, Admin.');
+                }
                 return redirect()
                     ->intended($this->redirectPath())
                     ->with('success', 'Login successful! Welcome back.');
