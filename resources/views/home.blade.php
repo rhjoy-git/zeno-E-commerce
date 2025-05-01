@@ -11,7 +11,7 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
-    <title>Zeno - E-Commerce</title>
+    <title>Zeno - Shopping</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 

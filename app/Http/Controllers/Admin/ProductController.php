@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    /**
      * Display a listing of the resource.
      */
     public function index()

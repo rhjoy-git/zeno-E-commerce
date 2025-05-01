@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\BrandController;
 
 Route::get('/', function () {
     return view('home');
@@ -109,7 +110,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         ->name('reports.index');
     Route::get('settings', [SettingController::class, 'index'])
         ->name('settings');
+    Route::resource('brands', BrandController::class);
 });
+
+// Frontend Routes
+// Route::get('/brand/{id}', [BrandController::class, 'show'])
+//     ->name('brand.products');
 
 // Logout
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');

@@ -13,8 +13,9 @@
         x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
         x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-95"
-        class="absolute top-3/4 left-0 right-0 w-36 z-20 bg-white shadow-lg rounded-md text-center mx-auto mt-6 overflow-hidden">
+        class="absolute top-3/4 left-0 right-0 -translate-x-4 w-36 z-20 bg-white shadow-lg rounded-md text-center mx-auto mt-6 overflow-hidden">
         @auth
+        @if(Gate::check('isCustomer'))
         <a href="{{ route('customer.dashboard') }}"
             class="flex items-center px-4 py-2 text-sm text-gray-700 hover:text-indigo-600 hover:bg-gray-100 transition-colors duration-200">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,6 +25,17 @@
             </svg>
             Dashboard
         </a>
+        @elseif(Gate::check('isAdmin'))
+        <a href="{{ route('admin.dashboard') }}"
+            class="flex items-center px-4 py-2 text-sm text-gray-700 hover:text-indigo-600 hover:bg-gray-100 transition-colors duration-200">
+            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
+                </path>
+            </svg>
+            Dashboard
+        </a>
+        @endif
         <a href="{{ route('customer.orders') }}"
             class="flex items-center px-4 py-2 text-sm text-gray-700 hover:text-indigo-600 hover:bg-gray-100 transition-colors duration-200">
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
