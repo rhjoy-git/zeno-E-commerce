@@ -100,8 +100,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         ->name('dashboard');
     Route::get('orders', [OrderController::class, 'index'])
         ->name('orders.index');
-    Route::get('products', [ProductController::class, 'index'])
-        ->name('products.index');
+    // Route::get('products', [ProductController::class, 'index'])
+    //     ->name('products.index');
     Route::get('categories', [CategoryController::class, 'index'])
         ->name('categories.index');
     Route::get('customers', [CustomerController::class, 'index'])
@@ -111,6 +111,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('settings', [SettingController::class, 'index'])
         ->name('settings');
     Route::resource('brands', BrandController::class);
+
+    Route::resource('products', ProductController::class);
+    // Route::resource('categories', CategoryController::class);
+    // Route::resource('customers', CustomerController::class);
+    // Route::resource('orders', OrderController::class);
+    // Route::resource('reports', ReportController::class);
+    // Route::resource('settings', SettingController::class);
 });
 
 // Frontend Routes

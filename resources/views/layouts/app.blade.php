@@ -18,6 +18,7 @@
 
 <body class="bg-gray-50">
     @yield('content')
+    @stack('scripts')
 </body>
 
 </html>

@@ -12,16 +12,16 @@ class BrandController extends Controller
     // Index - List all brands
     public function index()
     {
-        $brands = Brand::latest()->get();
+        $brands = Brand::latest()->paginate(3);
         return view('admin.brands.index', compact('brands'));
     }
-    // Route
 
-    // Controller Method
+    // Show - find brand by id
     public function show($id)
     {
         $brand = Brand::with('products')->findOrFail($id);
-        return view('frontend.brand-products', compact('brand'));
+        // dd($brand->products);
+        return view('admin.brands.brand-products', compact('brand'));
     }
     // Store - Create new brand
     public function store(Request $request)

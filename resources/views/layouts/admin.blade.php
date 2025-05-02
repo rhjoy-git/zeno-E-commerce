@@ -5,32 +5,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}" sizes="32x32" />
     <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}" sizes="180x180" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="{{asset('css/preloader.css')}}">
+
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <title>Zeno - @yield('title')</title>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
 </head>
 
 <body class="font-sans antialiased bg-gray-100" x-data="{ mobileMenuOpen: true }">
+
+    <!-- Preloader -->
+    @include('partials.preloader')
+
     <div class="min-h-screen flex">
         <!-- Sidebar -->
         <div class="hidden md:flex md:flex-shrink-0">
-            <div class="flex flex-col w-64 border-r border-gray-200 bg-white">
+            <div class="flex flex-col w-56 border-r border-gray-200 bg-white">
                 <div class="h-0 flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
                     <!-- Logo -->
-                    <div class="flex items-center flex-shrink-0 px-4">
+                    <div class="flex items-center flex-shrink-0 px-5">
                         <x-application-logo class="h-8 w-auto" />
                     </div>
                     <!-- Sidebar Navigation -->
-                    <nav class="mt-5 flex-1 px-2 space-y-1">
+                    <nav class="mt-5 flex-1 pl-4 pr-2 space-y-1">
                         @include('admin.partials.sidebar-links')
                     </nav>
                 </div>
@@ -137,6 +144,9 @@
             </div>
         </div>
     </div>
+
+    <script src="{{ asset('js/preloader.js')}}"></script>
+    @stack('scripts')
 </body>
 
 </html>

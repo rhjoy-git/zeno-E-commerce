@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Product;
 
 class ProductController extends Controller
 {
@@ -11,7 +12,11 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        // Fetch all products with their brands
+        $products = Product::paginate(10);
+        dd($products);
+        // Return the view with the products
+        return view('admin.products.index', compact('products'));
     }
 
     /**

@@ -8,6 +8,7 @@
 
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}" sizes="32x32" />
     <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}" sizes="180x180" />
+    <link rel="stylesheet" href="{{asset('css/preloader.css')}}">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
@@ -16,7 +17,8 @@
 </head>
 
 <body class="bg-gray-50">
-
+    <!-- Preloader -->
+    @include('partials.preloader')
     @include('frontend.navbar')
     @include('frontend.heroSection')
     @include('frontend.new-arrivals')
@@ -119,6 +121,7 @@
         },
     });
     </script>
+    <script src="{{ asset('js/preloader.js')}}"></script>
 </body>
 
 </html>

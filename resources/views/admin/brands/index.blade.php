@@ -29,6 +29,9 @@
                             <th scope="col"
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Actions</th>
+                            <th scope="col"
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Products</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -60,17 +63,25 @@
                                     </form>
                                 </div>
                             </td>
+                            
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="{{ route('admin.brands.show', $brand->id) }}"
+                                    class="inline-flex items-center px-3 py-1.5 border border-blue-300 rounded-md text-blue-600 bg-white hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200">
+                                    <i class="fas fa-eye mr-2" aria-hidden="true"></i>
+                                    View Products
+                                </a>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
 
-            {{-- @if($brands->hasPages())
-            <div class="mt-4 px-6 py-3 bg-gray-50 border-t border-gray-200">
+            @if($brands->hasPages())
+            <div id="pagination" class="mt-4 px-6 py-3 bg-gray-50 border-t border-gray-200">
                 {{ $brands->links() }}
             </div>
-            @endif --}}
+            @endif
         </div>
     </div>
 
