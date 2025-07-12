@@ -17,7 +17,7 @@
     </div>
 
     <!-- Dropdown menu -->
-    <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-100"
+    <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-100" style="display: none;"
         x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100"
         x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100"
         x-transition:leave-end="transform opacity-0 scale-95"
@@ -33,7 +33,7 @@
                 Your Profile
             </div>
         </a>
-        <a href="{{ route('admin.settings') }}"
+        <a href="{{ route('admin.settings.index') }}"
             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
             role="menuitem" tabindex="-1" id="user-menu-item-1">
             <div class="flex items-center">

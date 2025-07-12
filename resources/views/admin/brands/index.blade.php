@@ -2,72 +2,77 @@
 @section('title', 'Brands Management')
 @section('content')
 
-@include('admin.partials.bashboard-header')
+
+@if(session('success'))
+<div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
+    class="fixed top-4 right-4 bg-black text-white px-4 py-2 rounded shadow">
+    {{ session('success') }}
+</div>
+@endif
+
+@if(session('error'))
+<div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)"
+    class="fixed top-4 right-4 bg-red-700 text-white px-4 py-2 rounded shadow">
+    {{ session('error') }}
+</div>
+@endif
 
 <div class="container mx-auto px-4 py-6" x-data="brandManagement()">
-    <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white flex justify-between items-center">
+    <!-- Error message container -->
+    <div x-show="errorMessage" x-text="errorMessage"
+        class="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow"
+        x-init="setTimeout(() => errorMessage = '', 3000)"></div>
+    <div class="bg-white overflow-hidden">
+        <div class="px-6 py-4 bg-black text-white flex justify-between items-center">
             <h2 class="text-xl font-bold">Brands Management</h2>
             <button @click="showCreateModal = true"
-                class="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all duration-200 flex items-center space-x-2">
-                <i class="fas fa-plus"></i>
-                <span>Add Brand</span>
+                class="px-4 py-2 bg-white text-black hover:bg-gray-100 transition-all duration-200">
+                Add Brand
             </button>
         </div>
 
         <div class="p-6">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+                    <thead>
                         <tr>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Logo</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Name</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions</th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Products</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Logo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Products</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach ($brands as $brand)
-                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                        <tr>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <img src="{{ asset('storage/' . $brand->brandImg) }}"
                                     class="h-12 w-12 rounded-full object-cover border border-gray-200"
                                     alt="{{ $brand->brandName }}">
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $brand->brandName }}</div>
+                                <div class="text-sm font-medium">{{ $brand->brandName }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex space-x-2">
                                     <button
                                         @click="openEditModal({{ $brand->id }}, '{{ $brand->brandName }}', '{{ asset('storage/' . $brand->brandImg) }}')"
-                                        class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition-colors duration-200">
-                                        <i class="fas fa-edit mr-1"></i> Edit
+                                        class="px-3 py-1 text-white bg-green-600 rounded-md hover:bg-green-800"><i class="fas fa-edit mr-1"></i>
+                                        Edit
                                     </button>
-                                    <form action="{{ route('admin.brands.destroy', $brand->id) }}" method="POST"
-                                        class="inline">
+                                    <form action="{{ route('admin.brands.destroy', $brand->id) }}" method="POST">
                                         @csrf @method('DELETE')
                                         <button type="submit"
-                                            class="px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors duration-200"
-                                            onclick="return confirm('Are you sure you want to delete this brand?')">
-                                            <i class="fas fa-trash mr-1"></i> Delete
+                                            class="px-3 py-1 text-white bg-red-500 rounded-md hover:bg-red-700"
+                                            onclick="return confirm('Are you sure?')">
+                                          <i class="fas fa-trash-alt mr-1"></i>  Delete 
                                         </button>
                                     </form>
                                 </div>
                             </td>
-                            
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <a href="{{ route('admin.brands.show', $brand->id) }}"
-                                    class="inline-flex items-center px-3 py-1.5 border border-blue-300 rounded-md text-blue-600 bg-white hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200">
-                                    <i class="fas fa-eye mr-2" aria-hidden="true"></i>
+                                    class="px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-100">
                                     View Products
                                 </a>
                             </td>
@@ -78,7 +83,7 @@
             </div>
 
             @if($brands->hasPages())
-            <div id="pagination" class="mt-4 px-6 py-3 bg-gray-50 border-t border-gray-200">
+            <div class="mt-4 px-6 py-3 border-t border-gray-200">
                 {{ $brands->links() }}
             </div>
             @endif
@@ -88,46 +93,32 @@
     @include('admin.brands.modals.create')
     @include('admin.brands.modals.edit')
 </div>
+
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('brandManagement', () => ({
             showCreateModal: false,
             showEditModal: false,
             isSubmitting: false,
-            brandForm: {
-                name: '',
-                logo: null
-            },
-            editForm: {
-                id: null,
-                name: '',
-                currentLogo: '',
-                newLogo: null
-            },
+            errorMessage: '',
+            brandForm: { name: '', logo: null },
+            editForm: { id: null, name: '', currentLogo: '', newLogo: null },
 
             openEditModal(id, name, logo) {
-                this.editForm = {
-                    id: id,
-                    name: name,
-                    currentLogo: logo,
-                    newLogo: null
-                };
+                this.editForm = { id, name, currentLogo: logo, newLogo: null };
                 this.showEditModal = true;
             },
 
             async submitBrandForm() {
                 this.isSubmitting = true;
+                this.errorMessage = '';
+                
                 try {
                     const formData = new FormData();
                     formData.append('brandName', this.brandForm.name);
                     formData.append('brandImg', this.brandForm.logo);
 
-                    const response = await axios.post('{{ route("admin.brands.store") }}', formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    });
-
+                    await axios.post('{{ route("admin.brands.store") }}', formData);
                     window.location.reload();
                 } catch (error) {
                     this.handleError(error, 'Error creating brand');
@@ -138,21 +129,15 @@
 
             async submitEditForm() {
                 this.isSubmitting = true;
+                this.errorMessage = '';
+                
                 try {
                     const formData = new FormData();
                     formData.append('_method', 'PUT');
                     formData.append('brandName', this.editForm.name);
-                    
-                    if (this.editForm.newLogo) {
-                        formData.append('brandImg', this.editForm.newLogo);
-                    }
+                    if (this.editForm.newLogo) formData.append('brandImg', this.editForm.newLogo);
 
-                    const response = await axios.post(`/admin/brands/${this.editForm.id}`, formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    });
-
+                    await axios.post(`/admin/brands/${this.editForm.id}`, formData);
                     window.location.reload();
                 } catch (error) {
                     this.handleError(error, 'Error updating brand');
@@ -162,11 +147,9 @@
             },
 
             handleError(error, defaultMessage) {
-                // alert('Error:', error);
                 let errorMessage = defaultMessage;
                 
                 if (error.response) {
-                    // The request was made and the server responded with a status code
                     if (error.response.data && error.response.data.message) {
                         errorMessage = error.response.data.message;
                     } else if (error.response.status === 422) {
@@ -177,7 +160,7 @@
                     errorMessage = 'No response received from server';
                 }
                 
-                alert(errorMessage);
+                this.errorMessage = errorMessage;
             }
         }));
     });

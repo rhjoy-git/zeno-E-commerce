@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 @section('title', 'Brand Products Management')
 @section('content')
-{{-- Admin Header --}}
-@include('admin.partials.bashboard-header')
+{{-- Admin Header rounded--}}
+
 
 <div class="container mx-auto px-4 py-8">
-    <!-- Brand Header Section -->
+    <!-- Brand Header Section rounded-->
     <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div class="flex items-start gap-4">
@@ -27,7 +27,7 @@
 
             <div class="flex items-center gap-3">
                 <a href="{{ route('admin.brands.index') }}"
-                    class="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors shadow-xs">
+                    class="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover: transition-colors shadow-xs">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -39,7 +39,7 @@
         </div>
     </div>
 
-    <!-- Products Section -->
+    <!-- Products Section rounded-->
     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <div>
@@ -47,7 +47,7 @@
                 <p class="text-gray-500 mt-1">{{ $brand->products->count() }} products found</p>
             </div>
             <div>
-                <a href="{{ route('admin.products.create') }}"
+                <a href="{{ route('admin.brands.products.create', $brand->id) }}"
                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -67,7 +67,7 @@
                     <a href="#" class="block">
                         <img src="{{ $product->image }}" alt="{{ $product->title }}" class="w-full h-48 object-cover">
 
-                        <!-- Discount Badge -->
+                        <!-- Discount Badge rounded-->
                         @if($product->discount > 0)
                         <span
                             class="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
@@ -75,7 +75,7 @@
                         </span>
                         @endif
 
-                        <!-- Stock Status -->
+                        <!-- Stock Status rounded-->
                         <span
                             class="absolute bottom-3 left-3 bg-{{ $product->stock ? 'indigo' : 'red' }}-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                             {{ $product->stock ? 'In Stock' : 'Out of Stock' }}
@@ -86,7 +86,7 @@
                 <div class="p-4">
                     <div class="flex justify-between items-start mb-2">
                         <h3 class="font-semibold text-lg text-gray-800">{{ $product->title }}</h3>
-                        <!-- Star Rating -->
+                        <!-- Star Rating rounded-->
                         <div class="flex items-center">
                             <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path
@@ -118,7 +118,7 @@
                     </div>
                 </div>
 
-                <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-between">
+                <div class="px-4 py-3  border-t border-gray-200 flex justify-between">
                     <a href="#" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View Details</a>
                     <a href="#" class="text-green-600 hover:text-green-800 text-sm font-medium">Edit</a>
                 </div>
@@ -135,7 +135,7 @@
             <h3 class="mt-2 text-lg font-medium text-gray-900">No products found</h3>
             <p class="mt-1 text-gray-500">This brand doesn't have any products yet.</p>
             <div class="mt-6">
-                <a href="#"
+                <a href="{{ route('admin.brands.products.create', $brand->id) }}"
                     class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">

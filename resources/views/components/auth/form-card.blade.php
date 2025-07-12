@@ -4,11 +4,11 @@
     class="min-h-screen bg-gradient-to-r from-indigo-50 via-white to-indigo-50 flex items-center justify-center py-12 px-6">
     <div x-show="show" x-transition:enter="transition ease-out duration-700"
         x-transition:enter-start="opacity-0 translate-y-10" x-transition:enter-end="opacity-100 translate-y-0"
-        class="w-full mx-auto max-w-md bg-white rounded-2xl shadow-lg p-8 space-y-6 ">
+        class="w-full mx-auto max-w-md bg-white -2xl shadow-lg p-8 space-y-6 ">
 
         {{-- Brand Icon --}}
         <div class="flex justify-center mb-6 p-3">
-            <img class="h-6 w-auto shadow-lg" src="{{ asset('images/Zeno.png') }}" alt="Brand Logo">
+            <img class="h-6 w-auto" src="{{ asset('images/Zeno.png') }}" alt="Brand Logo">
         </div>
 
         {{-- Title and Subtitle --}}

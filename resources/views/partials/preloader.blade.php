@@ -12,7 +12,7 @@
         </div>
 
         <!-- Progress bar -->
-        <div class="w-64 bg-gray-200 rounded-full h-2.5">
+        <div class="w-64 bg-gray-200 -full h-2.5">
             <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
         </div>
 

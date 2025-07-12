@@ -12,31 +12,33 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
-
             $table->id();
             $table->string('title', 200);
-            $table->string('short_des', 500);
-            $table->string('price', 50);
-            $table->boolean('discount');
-            $table->string('discount_price', 50);
-            $table->string('image', 200);
-            $table->boolean('stock');
-            $table->float('star');
-            $table->enum('remark', ['popular', 'new', 'top', 'special', 'trending', 'regular']);
-            
-            $table->unsignedBigInteger('category_id');
-            $table->unsignedBigInteger('brand_id');
+            $table->string('short_des', 500)->nullable();
+            $table->decimal('price', 8, 2)->default(0);
+            $table->boolean('discount')->default(false);
+            $table->decimal('discount_price', 8, 2)->nullable();
+            $table->integer('stock_alert')->nullable();
+            $table->integer('stock_quantity')->default(0);
+            $table->string('slug')->unique();
+            $table->string('sku', 50)->unique();
+            $table->enum('status', ['active', 'inactive', 'discontinued'])->default('active')->index();
+            $table->unsignedBigInteger('category_id')->nullable();
+            $table->unsignedBigInteger('brand_id')->nullable();
+            $table->foreign('category_id')->references('id')->on('categories')->nullOnDelete()->cascadeOnUpdate();
+            $table->foreign('brand_id')->references('id')->on('brands')->nullOnDelete()->cascadeOnUpdate();
+            $table->index('category_id');
+            $table->index('brand_id');
+            $table->softDeletes();
+            $table->timestamps();
+        });
 
-            $table->foreign('category_id')->references('id')->on('categories')
-                ->restrictOnDelete()
-                ->cascadeOnUpdate();
-
-            $table->foreign('brand_id')->references('id')->on('brands')
-                ->restrictOnDelete()
-                ->cascadeOnUpdate();
-
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+        Schema::create('product_tags', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('product_id');
+            $table->string('tag', 50)->nullable(); // e.g., 'popular', 'new', 'trending'
+            $table->foreign('product_id')->references('id')->on('products')->cascadeOnDelete();
+            $table->timestamps();
         });
     }
 
@@ -45,6 +47,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('product_tags');
         Schema::dropIfExists('products');
     }
 };

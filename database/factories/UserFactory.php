@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class UserFactory extends Factory
@@ -12,9 +14,8 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => bcrypt('12345678'),
-            'otp' => '0000',
+            'password' => Hash::make('password'),
+            'otp' => null,
             'role_id' => 2,
         ];
     }

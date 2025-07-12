@@ -14,17 +14,13 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'email_verified_at',
         'remember_token',
         'role_id',
         'otp',
         'otp_expires_at',
-        'otp_attempts',
         'otp_blocked_until',
-        'otp_last_attempt',
-        'otp_blocked_until',
-        'last_otp_request_date',
-        'otp_requests_today',
-        'email_verified_at',
+        'otp_last_sent_at'
     ];
     protected $casts = [
         'otp_expires_at' => 'datetime',
@@ -62,5 +58,9 @@ class User extends Authenticatable
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPasswordNotification($token));
+    }
+    public function cartItems()
+    {
+        return $this->hasMany(ProductCart::class);
     }
 }

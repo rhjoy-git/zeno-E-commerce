@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->string('cus_name',100);
-            $table->string('cus_add',500);
+            $table->string('cus_address',500);
             $table->string('cus_city',50);
             $table->string('cus_state',50)->nullable();
             $table->string('cus_postcode',50)->nullable();
@@ -30,9 +30,6 @@ return new class extends Migration
             $table->string('ship_postcode',100)->nullable();
             $table->string('ship_country',100)->nullable();
             $table->string('ship_phone',50)->nullable();
-
-
-
 
             $table->unsignedBigInteger('user_id')->unique();
             $table->foreign('user_id')->references('id')->on('users')

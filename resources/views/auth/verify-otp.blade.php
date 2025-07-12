@@ -6,7 +6,7 @@
     class="min-h-screen bg-gradient-to-r from-indigo-50 via-white to-indigo-50 flex items-center justify-center py-12 px-6">
     <div x-show="show" x-transition:enter="transition ease-out duration-700"
         x-transition:enter-start="opacity-0 translate-y-10" x-transition:enter-end="opacity-100 translate-y-0"
-        class="w-full mx-auto max-w-md bg-white rounded-2xl shadow-lg p-8 space-y-6">
+        class="w-full mx-auto max-w-md bg-white -2xl shadow-lg p-8 space-y-6">
 
         {{-- Brand Icon --}}
         <div class="flex justify-center mb-6 p-3">
@@ -30,7 +30,7 @@
                     Enter 6-digit OTP
                 </label>
                 <input id="otp" name="otp" type="text" inputmode="numeric" pattern="[0-9]*"
-                    class="block w-full rounded-lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    class="block w-full -lg border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                     required autofocus autocomplete="one-time-code">
                 @error('otp')
                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -44,7 +44,7 @@
             </div>
 
             <button type="submit"
-                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                class="w-full flex justify-center py-2 px-4 border border-transparent -md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                 Verify OTP
             </button>
         </form>

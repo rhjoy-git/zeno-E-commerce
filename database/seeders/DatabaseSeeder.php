@@ -8,6 +8,7 @@ use Database\Seeders\UserSeeder;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\BrandSeeder;
 use Database\Seeders\ProductSeeder;
+use Database\Seeders\ColorSeeder;
 use Database\Seeders\ProductReviewSeeder;
 use Database\Seeders\PolicySeeder;
 
@@ -27,6 +28,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             ProductSeeder::class,
+            ProductSizeSeeder::class,
+            ColorSeeder::class,
             ProductReviewSeeder::class,
             PolicySeeder::class,
         ]);

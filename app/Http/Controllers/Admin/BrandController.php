@@ -12,7 +12,7 @@ class BrandController extends Controller
     // Index - List all brands
     public function index()
     {
-        $brands = Brand::latest()->paginate(3);
+        $brands = Brand::latest()->paginate(20);
         return view('admin.brands.index', compact('brands'));
     }
 
@@ -20,7 +20,7 @@ class BrandController extends Controller
     public function show($id)
     {
         $brand = Brand::with('products')->findOrFail($id);
-        // dd($brand->products);
+        // dd($brand);
         return view('admin.brands.brand-products', compact('brand'));
     }
     // Store - Create new brand
@@ -31,7 +31,7 @@ class BrandController extends Controller
             'brandImg' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $imagePath = $request->file('brandImg')->store('brands', 'public');
+        $imagePath = $request->file('brandImg')->store('images/brands', 'public');
 
         Brand::create([
             'brandName' => $request->brandName,
@@ -54,7 +54,7 @@ class BrandController extends Controller
 
         if ($request->hasFile('brandImg')) {
             Storage::delete('public/' . $brand->brandImg);
-            $data['brandImg'] = $request->file('brandImg')->store('brands', 'public');
+            $data['brandImg'] = $request->file('brandImg')->store('images/brands', 'public');
         }
 
         $brand->update($data);

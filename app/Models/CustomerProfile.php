@@ -8,14 +8,20 @@ class CustomerProfile extends Model
 {
     protected $fillable = [
         'cus_name',
-        'cus_email',
-        'cus_phone',
         'cus_address',
         'cus_city',
         'cus_state',
+        'cus_postcode',
         'cus_country',
-        'cus_zipcode',
-        'user_id'
+        'cus_phone',
+        'cus_fax',
+        'ship_name',
+        'ship_add',
+        'ship_city',
+        'ship_state',
+        'ship_postcode',
+        'ship_country',
+        'ship_phone'
     ];
     public function user()
     {

@@ -14,10 +14,10 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('product_id');
 
-            $table->string('color',200);
-            $table->string('size',200);
+            $table->string('color',200)->nullable();
+            $table->string('size',200)->nullable();
             $table->string('qty',200);
-            $table->string('price',200);
+            $table->decimal('price', 8, 2);
 
             $table->foreign('product_id')->references('id')->on('products')
                 ->restrictOnDelete()

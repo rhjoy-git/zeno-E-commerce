@@ -8,12 +8,12 @@ class PolicySeeder extends Seeder
 {
     public function run(): void {
         $policies = [
-            ['type' => 'about', 'des' => fake()->text(1000)],
-            ['type' => 'refund', 'des' => fake()->text(1000)],
-            ['type' => 'terms', 'des' => fake()->text(1000)],
-            ['type' => 'how to buy', 'des' => fake()->text(1000)],
-            ['type' => 'contact', 'des' => fake()->text(1000)],
-            ['type' => 'complain', 'des' => fake()->text(1000)]
+            ['type' => 'about', 'des' => ''],
+            ['type' => 'refund', 'des' => ''],
+            ['type' => 'terms', 'des' => ''],
+            ['type' => 'how to buy', 'des' => ''],
+            ['type' => 'contact', 'des' => ''],
+            ['type' => 'complain', 'des' => '']
         ];
     
         foreach ($policies as $policy) {

@@ -11,7 +11,8 @@ class CategorySeeder extends Seeder
             ['categoryName' => 'Electronics', 'categoryImg' => 'https://picsum.photos/200'],
             ['categoryName' => 'Clothing', 'categoryImg' => 'https://picsum.photos/201'],
             ['categoryName' => 'Books', 'categoryImg' => 'https://picsum.photos/202'],
-            ['categoryName' => 'Home & Kitchen', 'categoryImg' => 'https://picsum.photos/203']
+            ['categoryName' => 'Home & Kitchen', 'categoryImg' => 'https://picsum.photos/203'],
+            
         ];
     
         foreach ($categories as $category) {

@@ -17,10 +17,10 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <!-- Sidebar Navigation -->
                 <div class="md:col-span-1">
-                    <div class="bg-white shadow rounded-lg p-4">
+                    <div class="bg-white shadow -lg p-4">
                         <nav class="space-y-2">
                             <a href="{{ route('customer.dashboard') }}"
-                                class="flex items-center p-3 text-indigo-600 bg-indigo-50 rounded-lg font-medium">
+                                class="flex items-center p-3 text-indigo-600 bg-indigo-50 -lg font-medium">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
@@ -29,7 +29,7 @@
                                 Dashboard
                             </a>
                             <a href="{{ route('customer.orders') }}"
-                                class="flex items-center p-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200">
+                                class="flex items-center p-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 -lg transition-colors duration-200">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
@@ -38,7 +38,7 @@
                                 My Orders
                             </a>
                             <a href="{{ route('customer.wishlist') }}"
-                                class="flex items-center p-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200">
+                                class="flex items-center p-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 -lg transition-colors duration-200">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
@@ -47,7 +47,7 @@
                                 Wishlist
                             </a>
                             <a href="{{ route('customer.addresses') }}"
-                                class="flex items-center p-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200">
+                                class="flex items-center p-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 -lg transition-colors duration-200">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
@@ -58,7 +58,7 @@
                                 Addresses
                             </a>
                             <a href="{{ route('profile') }}"
-                                class="flex items-center p-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors duration-200">
+                                class="flex items-center p-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 -lg transition-colors duration-200">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -72,14 +72,14 @@
                 <!-- Main Dashboard Content -->
                 <div class="md:col-span-3">
                     <!-- Welcome Card -->
-                    <div class="bg-white shadow rounded-lg p-6 mb-6">
+                    <div class="bg-white shadow -lg p-6 mb-6">
                         <div class="flex items-center justify-between">
                             <div>
                                 <h2 class="text-xl font-semibold text-gray-800">Welcome back, {{ Auth::user()->name }}!
                                 </h2>
                                 <p class="text-gray-600 mt-1">Here's what's happening with your account today.</p>
                             </div>
-                            <div class="bg-indigo-100 p-3 rounded-full">
+                            <div class="bg-indigo-100 p-3 -full">
                                 <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -91,9 +91,9 @@
 
                     <!-- Stats Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                        <div class="bg-white shadow rounded-lg p-6">
+                        <div class="bg-white shadow -lg p-6">
                             <div class="flex items-center">
-                                <div class="bg-green-100 p-3 rounded-full mr-4">
+                                <div class="bg-green-100 p-3 -full mr-4">
                                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -106,9 +106,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="bg-white shadow rounded-lg p-6">
+                        <div class="bg-white shadow -lg p-6">
                             <div class="flex items-center">
-                                <div class="bg-blue-100 p-3 rounded-full mr-4">
+                                <div class="bg-blue-100 p-3 -full mr-4">
                                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -121,9 +121,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="bg-white shadow rounded-lg p-6">
+                        <div class="bg-white shadow -lg p-6">
                             <div class="flex items-center">
-                                <div class="bg-purple-100 p-3 rounded-full mr-4">
+                                <div class="bg-purple-100 p-3 -full mr-4">
                                     <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -140,7 +140,7 @@
                     </div>
 
                     <!-- Recent Orders -->
-                    <div class="bg-white shadow rounded-lg p-6">
+                    <div class="bg-white shadow -lg p-6">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-semibold text-gray-800">Recent Orders</h3>
                             <a href="{{ route('customer.orders') }}"
@@ -149,7 +149,7 @@
                         </div>
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                                <thead class="">
                                     <tr>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -175,7 +175,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Jun 15, 2023</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span
-                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Delivered</span>
+                                                class="px-2 inline-flex text-xs leading-5 font-semibold -full bg-green-100 text-green-800">Delivered</span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$125.99</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -188,7 +188,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Jun 18, 2023</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span
-                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Processing</span>
+                                                class="px-2 inline-flex text-xs leading-5 font-semibold -full bg-yellow-100 text-yellow-800">Processing</span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$89.50</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -201,7 +201,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Jun 20, 2023</td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span
-                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Shipped</span>
+                                                class="px-2 inline-flex text-xs leading-5 font-semibold -full bg-blue-100 text-blue-800">Shipped</span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">$245.75</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">

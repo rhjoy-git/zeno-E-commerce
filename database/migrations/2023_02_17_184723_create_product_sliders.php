@@ -13,16 +13,13 @@ return new class extends Migration
     {
         Schema::create('product_sliders', function (Blueprint $table) {
             $table->id();
-            $table->string('title',200);
-            $table->string('short_des',500);
-            $table->string('price',100);
-            $table->string('image',200);
-
-            $table->unsignedBigInteger('product_id')->unique();
-            $table->foreign('product_id')->references('id')->on('products')
-                ->restrictOnDelete()
-                ->restrictOnUpdate();
-
+            $table->string('title', 200)->nullable();
+            $table->string('short_des', 500)->nullable();
+            $table->string('price', 100)->nullable();
+            $table->string('image', 200)->nullable();
+            $table->unsignedBigInteger('product_id');
+            $table->foreign('product_id')->references('id')->on('products')->restrictOnDelete()->restrictOnUpdate();
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });

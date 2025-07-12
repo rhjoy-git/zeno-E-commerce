@@ -5,51 +5,78 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Product extends Model
 {
     use HasFactory, SoftDeletes;
     protected $fillable = [
-        'name',
-        'slug',
+        'title',
+        'short_des',
+        'price',
         'category_id',
         'brand_id',
-        'price',
+        'discount',
         'discount_price',
-        'quantity',
-        'description',
-        'image',
+        'stock',
+        'stock_quantity',
+        'stock_alert',
+        'slug',
+        'sku',
         'status'
     ];
-    public function category() {
+    public function category()
+    {
         return $this->belongsTo(Category::class);
     }
-    
-    public function brand() {
+
+    public function brand()
+    {
         return $this->belongsTo(Brand::class);
     }
-    
-    public function reviews() {
+
+    public function reviews()
+    {
         return $this->hasMany(ProductReview::class);
     }
-    
-    public function productDetail() {
+
+    public function approvedReviews()
+    {
+        return $this->hasMany(ProductReview::class)->where('status', 'approved');
+    }
+
+    public function productDetail()
+    {
         return $this->hasOne(ProductDetail::class);
     }
-    
-    public function slider() {
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
+
+    public function slider()
+    {
         return $this->hasOne(ProductSlider::class);
     }
-    
-    public function wishes() {
+
+    public function wishes()
+    {
         return $this->hasMany(ProductWish::class);
     }
-    
-    public function carts() {
+
+    public function carts()
+    {
         return $this->hasMany(ProductCart::class);
     }
-    
-    public function invoiceProducts() {
+    public function tags()
+    {
+        return $this->hasMany(ProductTag::class);
+    }
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+    public function invoiceProducts()
+    {
         return $this->hasMany(InvoiceProduct::class);
     }
-    
 }

@@ -28,7 +28,7 @@ $id = $id ?? $name;
     <input type="{{ $type }}" id="{{ $id }}" name="{{ $name }}" placeholder="{{ $placeholder }}"
         value="{{ old($name, $value) }}" {{ $required ? 'required' : '' }} {{ $autocomplete ? 'autocomplete' : '' }} {{
         $disabled ? 'disabled' : '' }} {{ $readonly ? 'readonly' : '' }} {{ $autofocus ? 'autofocus' : '' }}
-        @class([ 'block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150'
+        @class([ 'block w-full -lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150'
         , 'border-red-300 text-red-900 placeholder-red-300'=> $errors->has($name),
     $class
     ])

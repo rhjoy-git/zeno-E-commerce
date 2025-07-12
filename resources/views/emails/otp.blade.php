@@ -1,18 +1,22 @@
 @component('mail::message')
-# Your OTP Code
+# 🔐 Verification Required
 
-Your one-time verification code is:  
-**{{ $otp }}**
+We received a request to verify your identity.
+Please use the following **One-Time Password (OTP)** to proceed:
 
 @component('mail::panel')
-This code will expire in **3 minutes**  
-Please use it before {{ now()->addMinutes(3)->format('h:i A') }}
+<span style="font-size: 20px; font-weight: bold;">Your OTP Code:</span>
+<span style="font-size: 24px; font-weight: bold; color: #663dff;">{{ $otp }}</span>
+
+This code will expire at **{{ now()->addMinutes(3)->format('h:i A') }}**.
 @endcomponent
+
+If you did not initiate this request, please disregard this email.
 
 @component('mail::button', ['url' => config('app.url')])
-Visit {{ config('app.name') }}
+Go to {{ config('app.name') }}
 @endcomponent
 
-Thanks,<br>
-{{ config('app.name') }} Team
+Thanks,
+**The {{ config('app.name') }} Team**
 @endcomponent

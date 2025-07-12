@@ -6,8 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductSlider extends Model
 {
-    public function product() {
+    protected $fillable = [
+        'status',
+    ];
+    public function product()
+    {
         return $this->belongsTo(Product::class);
     }
-    
 }
