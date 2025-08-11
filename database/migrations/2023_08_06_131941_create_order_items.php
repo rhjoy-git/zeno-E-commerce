@@ -1,0 +1,83 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('order_items', function (Blueprint $table) {
+            // Primary Key
+            $table->id();
+
+            // Relationships
+            $table->unsignedBigInteger('order_id');
+            $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('product_variant_id')->nullable();
+
+            // Product Snapshot (captures product state at time of purchase)
+            $table->string('name');
+            $table->string('sku');
+            $table->text('description')->nullable();
+            $table->string('variant_options')->nullable(); // JSON: {"color": "red", "size": "XL"}
+
+            // Pricing
+            $table->decimal('price', 12, 2);
+            $table->decimal('original_price', 12, 2)->nullable();
+            $table->decimal('discount_amount', 12, 2)->default(0);
+            $table->decimal('tax_amount', 12, 2)->default(0);
+
+            // Quantities
+            $table->integer('quantity');
+            $table->integer('quantity_shipped')->default(0);
+            $table->integer('quantity_refunded')->default(0);
+            $table->integer('quantity_cancelled')->default(0);
+
+            // Totals
+            $table->decimal('row_total', 12, 2);
+            $table->decimal('row_total_incl_tax', 12, 2);
+
+            // Shipping
+            $table->decimal('weight', 10, 2)->nullable();
+            $table->decimal('volume', 10, 2)->nullable();
+
+            // Status
+            $table->enum('fulfillment_status', [
+                'unfulfilled',
+                'partially_fulfilled',
+                'fulfilled',
+                'returned',
+                'cancelled'
+            ])->default('unfulfilled');
+
+            // Additional Information
+            $table->text('notes')->nullable();
+
+            // Timestamps
+            $table->timestamps();
+
+            // Indexes
+            $table->index('order_id');
+            $table->index('product_id');
+            $table->index('sku');
+
+            // Foreign Keys
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->foreign('product_id')->references('id')->on('products')->onDelete('set null');
+            $table->foreign('product_variant_id')->references('id')->on('product_variants')->onDelete('set null');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('order_items');
+    }
+};

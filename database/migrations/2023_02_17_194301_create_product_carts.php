@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('color',200)->nullable();
             $table->string('size',200)->nullable();
             $table->string('qty',200);
-            $table->decimal('price', 8, 2);
+            $table->decimal('price', 10, 2);
 
             $table->foreign('product_id')->references('id')->on('products')
                 ->restrictOnDelete()
