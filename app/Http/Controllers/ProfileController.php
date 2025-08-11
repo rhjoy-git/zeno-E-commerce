@@ -18,7 +18,11 @@ class ProfileController extends Controller
 {
     public function showProfile(Request $request): View
     {
-
+        if (Gate::allows('isAdmin')) {
+            return view('admin.profile.profile', [
+                'user' => $request->user(),
+            ]);
+        }
         return view('customer.profile', [
             'user' => $request->user(),
         ]);

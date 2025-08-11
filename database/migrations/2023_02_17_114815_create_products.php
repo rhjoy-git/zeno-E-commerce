@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('title', 200);
             $table->string('short_des', 500)->nullable();
-            $table->decimal('price', 8, 2)->default(0);
+            $table->decimal('price', 10, 2)->default(0);
             $table->boolean('discount')->default(false);
-            $table->decimal('discount_price', 8, 2)->nullable();
+            $table->decimal('discount_price', 10, 2)->nullable();
             $table->integer('stock_alert')->nullable();
             $table->integer('stock_quantity')->default(0);
             $table->string('slug')->unique();
@@ -31,6 +31,8 @@ return new class extends Migration
             $table->index('brand_id');
             $table->softDeletes();
             $table->timestamps();
+            $table->index(['status', 'created_at']);
+            $table->fullText(['title', 'short_des']);
         });
 
         Schema::create('product_tags', function (Blueprint $table) {

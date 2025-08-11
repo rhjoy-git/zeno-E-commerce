@@ -16,7 +16,11 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        return view('admin.customers.index');
+        $customers = User::with('customerProfile')
+            ->whereHas('role', function ($query) {
+                $query->where('slug', 'customer');
+            })->paginate(20);
+        return view('admin.customers.index', compact('customers'));
     }
 
     /**

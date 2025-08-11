@@ -25,7 +25,9 @@ return new class extends Migration
             $table->unsignedSmallInteger('otp_requests_today')->default(0);
             $table->date('last_otp_request_date')->nullable();
             $table->rememberToken();
+            $table->enum('status', ['active', 'inactive', 'banned'])->default('active');
             $table->timestamps();
+            $table->unsignedInteger('entry_user_id')->nullable();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
