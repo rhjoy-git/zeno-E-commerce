@@ -80,7 +80,6 @@ return new class extends Migration
             // Indexes
             $table->index('order_number');
             $table->index('user_id');
-            $table->index('status');
             $table->index('payment_status');
             $table->index('created_at');
 

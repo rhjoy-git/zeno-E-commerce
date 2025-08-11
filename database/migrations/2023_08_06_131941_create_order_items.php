@@ -16,8 +16,8 @@ return new class extends Migration
             $table->id();
 
             // Relationships
-            $table->unsignedBigInteger('order_id');
-            $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('order_id')->nullable();
+            $table->unsignedBigInteger('product_id')->nullable();
             $table->unsignedBigInteger('product_variant_id')->nullable();
 
             // Product Snapshot (captures product state at time of purchase)

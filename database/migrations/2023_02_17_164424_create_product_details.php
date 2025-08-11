@@ -21,7 +21,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('product_id');
             $table->string('color', 50)->nullable();
-            $table->string('hex_code')->nullable();  
+            $table->string('hex_code')->nullable();
             $table->string('size', 50)->nullable();
             $table->integer('stock_alert')->nullable();
             $table->integer('stock_quantity')->default(0);
@@ -51,8 +51,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_details');
-        Schema::dropIfExists('product_variants');
-        Schema::dropIfExists('product_images');
+        Schema::dropIfExists('product_images');   
+        Schema::dropIfExists('product_variants'); 
+        Schema::dropIfExists('product_details'); 
     }
 };
