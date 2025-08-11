@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('policies', function (Blueprint $table) {
             $table->id();
             $table->enum('type',['about','refund','terms','how to buy','contact','complain']);
-            $table->longText('des');
+            $table->longText('description');
         });
     }
 

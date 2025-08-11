@@ -24,14 +24,14 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CategorySeeder::class,
             BrandSeeder::class,
-        ]);
-
-        $this->call([
-            ProductSeeder::class,
             ProductSizeSeeder::class,
             ColorSeeder::class,
+            ShippingAddressSeeder::class,
+            ProductSeeder::class,
             ProductReviewSeeder::class,
             PolicySeeder::class,
+            OrderSeeder::class,
+            OrderItemSeeder::class,
         ]);
     }
 }

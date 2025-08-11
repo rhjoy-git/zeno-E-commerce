@@ -12,14 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
-            // Primary Key
             $table->id();
-
-            // Order Identification
             $table->string('order_number')->unique();
             $table->string('invoice_number')->unique()->nullable();
-
-            // Order Status
             $table->enum('status', [
                 'pending',
                 'confirmed',
@@ -31,8 +26,6 @@ return new class extends Migration
                 'partially_refunded',
                 'on_hold'
             ])->default('pending')->index();
-
-            // Financials
             $table->decimal('subtotal', 12, 2);
             $table->decimal('discount_amount', 12, 2)->default(0);
             $table->decimal('tax_amount', 12, 2)->default(0);
@@ -41,50 +34,34 @@ return new class extends Migration
             $table->decimal('total_paid', 12, 2)->default(0);
             $table->decimal('total_refunded', 12, 2)->default(0);
             $table->string('currency', 3)->default('USD');
-
-            // Payment Information
             $table->enum('payment_status', ['pending', 'paid', 'partially_paid', 'refunded', 'failed'])->default('pending');
             $table->string('payment_method')->nullable();
             $table->string('transaction_id')->nullable();
             $table->text('payment_notes')->nullable();
-
-            // Shipping Information
             $table->unsignedBigInteger('shipping_address_id')->nullable();
             $table->string('shipping_method')->nullable();
             $table->decimal('shipping_weight', 10, 2)->nullable();
             $table->string('tracking_number')->nullable();
             $table->string('tracking_url')->nullable();
-
-            // Customer Information
             $table->unsignedBigInteger('user_id');
             $table->string('customer_email')->index();
             $table->string('customer_phone')->nullable();
             $table->string('customer_ip')->nullable();
-
-            // Dates
             $table->timestamp('confirmed_at')->nullable();
             $table->timestamp('paid_at')->nullable();
             $table->timestamp('processing_at')->nullable();
             $table->timestamp('shipped_at')->nullable();
             $table->timestamp('delivered_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
-
-            // Additional Information
             $table->text('notes')->nullable();
             $table->text('admin_notes')->nullable();
-
-            // Timestamps
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
-
-            // Indexes
-            $table->index('order_number');
             $table->index('user_id');
-            $table->index('status');
             $table->index('payment_status');
             $table->index('created_at');
-
-            // Foreign Keys
             $table->foreign('user_id')->references('id')->on('users')->onDelete('restrict');
             $table->foreign('shipping_address_id')->references('id')->on('shipping_addresses')->onDelete('set null');
         });

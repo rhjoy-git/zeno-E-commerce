@@ -2,12 +2,30 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class ProductCart extends Model
 {
-    protected $fillable = ['user_id', 'product_id', 'color', 'size', 'qty', 'price'];
-    
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'product_id',
+        'color',
+        'size',
+        'qty',
+        'price',
+        'created_by',
+        'updated_by',
+    ];
+
+    protected $casts = [
+        'qty' => 'integer',
+        'price' => 'decimal:2',
+    ];
+
     public function product()
     {
         return $this->belongsTo(Product::class);
@@ -16,5 +34,17 @@ class ProductCart extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($cart) {
+            $cart->created_by = Auth::id() ?? null;
+            $cart->updated_by = Auth::id() ?? null;
+        });
+
+        static::updating(function ($cart) {
+            $cart->updated_by = Auth::id() ?? null;
+        });
     }
 }

@@ -4,21 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 
-class ProductTag extends Model
+class Tag extends Model
 {
     use HasFactory;
-    protected $table = 'tags';
+
     protected $fillable = [
         'name',
         'created_by',
         'updated_by',
     ];
 
-    public function product()
+    public function products()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsToMany(
+            Product::class,
+            'product_tags',
+            'tag_id',
+            'product_id'
+        );
     }
 
     protected static function booted()
