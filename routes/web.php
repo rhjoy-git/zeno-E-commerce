@@ -12,6 +12,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 
 use App\Http\Controllers\Customer\CartController;
+use App\Http\Controllers\Customer\WishlistController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\CustomerDashboardController;
 use App\Http\Controllers\Customer\ProductController as CustomerProductController;
@@ -95,6 +96,9 @@ Route::middleware(['auth', 'customer'])->name('customer.')->group(function () {
         Route::get('/addresses/{id}', 'addressDetails')->name('address.details');
     });
 
+    // Wish list
+    Route::get('/wishlist', [WishlistController::class, 'getWishList'])->name('wishlist');
+
     // Checkout
     Route::get('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
     Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
@@ -136,6 +140,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Settings
     Route::resource('settings', SettingController::class);
+
+    // Profile
 });
 
 // ==================== Misc Routes ====================
