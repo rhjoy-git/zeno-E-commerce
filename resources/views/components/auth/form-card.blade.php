@@ -7,9 +7,9 @@
         class="w-full mx-auto max-w-md bg-white -2xl shadow-lg p-8 space-y-6 ">
 
         {{-- Brand Icon --}}
-        <div class="flex justify-center mb-6 p-3">
+        <a href="https://zeno.endbrackets.com/" title="Back to Home Page" class="flex justify-center mb-6 p-3">
             <img class="h-6 w-auto" src="{{ asset('images/Zeno.png') }}" alt="Brand Logo">
-        </div>
+        </a>
 
         {{-- Title and Subtitle --}}
         <div class="text-center">
