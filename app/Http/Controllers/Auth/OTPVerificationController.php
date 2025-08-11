@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Services\OtpService;
+use App\Events\UserRegistered;
 use Illuminate\Support\Facades\Auth;
 use Exception;
 use App\Http\Middleware\CheckOtpDailyLimit;
@@ -72,6 +73,7 @@ class OTPVerificationController extends Controller
 
                 // FINALLY LOGIN THE USER HERE
                 Auth::login($user, $request->remember ?? false);
+                event(new UserRegistered($user));
 
                 return redirect()->route('home')
                     ->with('success', 'Login successful!');

@@ -66,7 +66,6 @@ class ProductController extends Controller
         return view('admin.products.index', compact('products', 'categories', 'brands'));
     }
 
-
     /**
      * Show the form for creating a new resource.
      */
