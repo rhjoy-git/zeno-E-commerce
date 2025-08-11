@@ -14,15 +14,15 @@ class ProductSizeSeeder extends Seeder
     public function run(): void
     {
         DB::table('product_sizes')->insert([
-            ['name' => 'XS'],
-            ['name' => 'S'],
-            ['name' => 'M'],
-            ['name' => 'L'],
-            ['name' => 'XL'],
-            ['name' => 'XXL'],
-            ['name' => '38'],
-            ['name' => '39'],
-            ['name' => '42'],
+            ['name' => 'XS', 'created_by' => 1, 'updated_by' => 1],
+            ['name' => 'S', 'created_by' => 1, 'updated_by' => 1],
+            ['name' => 'M', 'created_by' => 1, 'updated_by' => 1],
+            ['name' => 'L', 'created_by' => 1, 'updated_by' => 1],
+            ['name' => 'XL', 'created_by' => 1, 'updated_by' => 1],
+            ['name' => 'XXL', 'created_by' => 1, 'updated_by' => 1],
+            ['name' => '38', 'created_by' => 1, 'updated_by' => 1],
+            ['name' => '39', 'created_by' => 1, 'updated_by' => 1],
+            ['name' => '42', 'created_by' => 1, 'updated_by' => 1],
         ]);
     }
 }

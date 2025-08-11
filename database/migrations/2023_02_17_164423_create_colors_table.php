@@ -13,8 +13,11 @@ return new class extends Migration
     {
         Schema::create('colors', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique(); 
-            $table->string('hex_code');   
+            $table->string('name')->unique();
+            $table->string('hex_code', 7);
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->index('name');
             $table->timestamps();
         });
     }

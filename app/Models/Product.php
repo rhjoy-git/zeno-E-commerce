@@ -2,28 +2,41 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Product extends Model
 {
     use HasFactory, SoftDeletes;
+
     protected $fillable = [
         'title',
-        'short_des',
+        'short_description',
         'price',
-        'category_id',
-        'brand_id',
         'discount',
         'discount_price',
-        'stock',
-        'stock_quantity',
         'stock_alert',
+        'stock_quantity',
         'slug',
         'sku',
-        'status'
+        'status',
+        'category_id',
+        'brand_id',
+        'created_by',
+        'updated_by',
     ];
+
+    protected $casts = [
+        'status' => 'string',
+        'discount' => 'boolean',
+        'price' => 'decimal:2',
+        'discount_price' => 'decimal:2',
+        'stock_quantity' => 'integer',
+        'stock_alert' => 'integer',
+    ];
+
     public function category()
     {
         return $this->belongsTo(Category::class);
@@ -44,18 +57,14 @@ class Product extends Model
         return $this->hasMany(ProductReview::class)->where('status', 'approved');
     }
 
-    public function productDetail()
+    public function details()
     {
         return $this->hasOne(ProductDetail::class);
     }
+
     public function images()
     {
         return $this->hasMany(ProductImage::class);
-    }
-
-    public function slider()
-    {
-        return $this->hasOne(ProductSlider::class);
     }
 
     public function wishes()
@@ -67,16 +76,41 @@ class Product extends Model
     {
         return $this->hasMany(ProductCart::class);
     }
+
     public function tags()
     {
-        return $this->hasMany(ProductTag::class);
+        return $this->belongsToMany(Tag::class, 'product_tags', 'product_id', 'tag_id');
     }
+
     public function variants()
     {
         return $this->hasMany(ProductVariant::class);
     }
-    public function invoiceProducts()
+
+    public function orderItems()
     {
-        return $this->hasMany(InvoiceProduct::class);
+        return $this->hasMany(OrderItem::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scopeByCategory($query, $categoryId)
+    {
+        return $query->where('category_id', $categoryId);
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($product) {
+            $product->created_by = Auth::id() ?? null;
+            $product->updated_by = Auth::id() ?? null;
+        });
+
+        static::updating(function ($product) {
+            $product->updated_by = Auth::id() ?? null;
+        });
     }
 }

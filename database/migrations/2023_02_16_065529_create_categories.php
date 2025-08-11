@@ -11,11 +11,13 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->string('categoryName', 50)->unique();
-            $table->string('categoryImg', 300);
+            $table->string('category_name', 50)->unique();
+            $table->string('category_image', 300);
             $table->unsignedBigInteger('parent_id')->nullable();
             $table->foreign('parent_id')->references('id')->on('categories')->nullOnDelete();
             $table->enum('status', ['active', 'inactive'])->default('active')->index();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });

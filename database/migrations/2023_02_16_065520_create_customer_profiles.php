@@ -35,31 +35,20 @@ return new class extends Migration
 
         Schema::create('shipping_addresses', function (Blueprint $table) {
             $table->id();
-            $table->string('recipient_name', 100);
-            $table->string('address_line1', 255);
-            $table->string('address_line2', 255)->nullable();
+            $table->unsignedBigInteger('user_id');
+            $table->string('name', 100);
+            $table->string('address', 255);
             $table->string('city', 100);
             $table->string('state', 100)->nullable();
-            $table->string('postal_code', 20);
             $table->string('country', 100);
-            $table->string('phone', 50);
-            $table->string('email', 100)->nullable();
-
-            $table->string('company_name', 100)->nullable();
-            $table->text('delivery_instructions')->nullable();
+            $table->string('postal_code', 20);
+            $table->string('phone', 20)->nullable();
             $table->boolean('is_default')->default(false);
-
-            // Relationships
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')
-                ->cascadeOnUpdate()
-                ->restrictOnDelete();
-
-            // Indexes
-            $table->index('user_id');
-            $table->index(['user_id', 'is_default']);
-
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+            $table->index('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

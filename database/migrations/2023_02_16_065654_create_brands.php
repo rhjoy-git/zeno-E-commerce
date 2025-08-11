@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('brands', function (Blueprint $table) {
             $table->id();
-            $table->string('brandName', 50)->unique();
-            $table->string('brandImg', 300);
+            $table->string('brand_name', 50)->unique();
+            $table->string('brand_image', 300);
             $table->enum('status', ['active', 'inactive'])->default('active')->index();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });
