@@ -54,7 +54,7 @@ class HomeController extends Controller
             ->map(function ($product) {
                 return [
                     'id' => $product->id,
-                    'image' => optional($product->images->first())->image_path ?? 'default-image.jpg',
+                    'image' => optional($product->images->first())->image_path ?? 'images/products/default.jpg',
                     'title' => $product->title,
                     'price' => $product->price,
                     'badge' => $product->discount ? 'Sale' : null,
