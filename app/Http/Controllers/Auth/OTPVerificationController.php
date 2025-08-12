@@ -3,52 +3,61 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
 use App\Services\OtpService;
 use App\Events\UserRegistered;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Exception;
-use App\Http\Middleware\CheckOtpDailyLimit;
 
 class OTPVerificationController extends Controller
 {
-    public function showOtpForm($email)
+
+    public function showOtpForm(string $token)
     {
-        $user = User::where('email', $email)
-            ->select('id', 'email', 'otp', 'otp_expires_at', 'otp_blocked_until')
-            ->firstOrFail();
+        $user = User::where('otp_verification_token', $token)
+            ->select('id', 'email', 'otp', 'otp_expires_at', 'otp_blocked_until', 'email_verified_at')
+            ->first();
 
-        // Check if OTP was already verified
-        if ($user->otp === null) {
-            return redirect()->route('login')->with('error', 'OTP already verified.');
+        if (!$user) {
+            Log::warning('Invalid OTP verification token: ' . $token);
+            return redirect()->route('login')->with('error', 'Invalid verification token.');
         }
 
-        // Check if user is blocked from resending
-        if ($user->otp_blocked_until && now()->lt($user->otp_blocked_until)) {
+        if ($user->email_verified_at) {
+            return redirect()->route('login')->with('error', 'Email already verified.');
+        }
+
+        if ($this->isUserBlocked($user)) {
             $remaining = now()->diffInMinutes($user->otp_blocked_until);
-            return redirect()->back()->with('error', "Too many attempts. Try again in {$remaining} minutes.");
+            return redirect()->route('login')->with('error', "Too many attempts. Try again in {$remaining} minutes.");
         }
-        // Convert to Carbon if it's a string
-        if (is_string($user->otp_expires_at)) {
-            $user->otp_expires_at = \Carbon\Carbon::parse($user->otp_expires_at);
-        }
+
         return view('auth.verify-otp', [
             'user' => $user,
-            'remainingSeconds' => now()->diffInSeconds($user->otp_expires_at)
+            'token' => $token,
+            'remainingSeconds' => $user->otp_expires_at ? now()->diffInSeconds($user->otp_expires_at) : 0,
         ]);
     }
 
-    public function resendOtp(Request $request, $email)
+    public function resendOtp(Request $request, string $token)
     {
         try {
-            $user = User::where('email', $email)->firstOrFail();
-            $otpService = new OtpService();
-            $otpService->generateAndSendOtp($user);
+            $user = User::where('otp_verification_token', $token)->first();
+            if (!$user) {
+                Log::warning('Invalid OTP resend token: ' . $token);
+                return redirect()->route('register')->with('error', 'Invalid verification token.');
+            }
 
-            return back()->with('success', 'OTP resent to your email!');
+            $otpService = new OtpService();
+            $newToken = $otpService->generateAndSendOtp($user);
+            return redirect()->route('otp.verify', ['token' => $newToken])
+                ->with('success', 'OTP resent to your email!');
         } catch (\Exception $e) {
-            return back()->withErrors(['otp' => 'Failed to resend OTP: ' . $e->getMessage()]);
+            Log::error('Failed to resend OTP for token ' . $token . ': ' . $e->getMessage());
+            return redirect()->route('otp.verify', ['token' => $token])
+                ->withErrors(['otp' => 'Failed to resend OTP. Please try again.']);
         }
     }
 
@@ -56,30 +65,31 @@ class OTPVerificationController extends Controller
     {
         $request->validate([
             'otp' => 'required|digits:6',
-            'email' => 'required|email'
+            'token' => 'required|string',
         ]);
 
         try {
-            $user = User::where('email', $request->email)->firstOrFail();
+            $user = User::where('otp_verification_token', $request->token)->first();
+            if (!$user) {
+                Log::warning('Invalid OTP verification token: ' . $request->token);
+                return back()->withInput()->withErrors(['otp' => 'Invalid verification token.']);
+            }
+
             $otpService = new OtpService();
-
-            if ($otpService->verifyOtp($user, $request->otp)) {
-                // Clear OTP data
-                $user->update([
-                    'otp' => null,
-                    'otp_expires_at' => null,
-                    'otp_attempts' => 0
-                ]);
-
-                // FINALLY LOGIN THE USER HERE
+            if ($otpService->verifyOtp($user, $request->otp, $request->token)) {
                 Auth::login($user, $request->remember ?? false);
                 event(new UserRegistered($user));
-
                 return redirect()->route('home')
-                    ->with('success', 'Login successful!');
+                    ->with('success', 'Registration successful! Welcome!');
             }
         } catch (\Exception $e) {
+            Log::error('OTP verification failed for token ' . $request->token . ': ' . $e->getMessage());
             return back()->withInput()->withErrors(['otp' => $e->getMessage()]);
         }
+    }
+
+    protected function isUserBlocked(User $user): bool
+    {
+        return $user->otp_blocked_until && now()->lt($user->otp_blocked_until);
     }
 }

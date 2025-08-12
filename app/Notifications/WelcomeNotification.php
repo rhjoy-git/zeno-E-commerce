@@ -10,53 +10,44 @@ use Illuminate\Notifications\Notification;
 class WelcomeNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
     public $user;
-    /**
-     * Create a new notification instance.
-     */
+
     public function __construct($user)
     {
         $this->user = $user;
+        $this->onQueue('notifications');
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
         return ['mail', 'database'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail($notifiable)
     {
         return (new MailMessage)
             ->subject('Welcome to ' . config('app.name'))
             ->greeting('Hello ' . $this->user->name . '!')
-            ->line('We’re excited to have you on board.')
+            ->line('Thank you for joining ' . config('app.name') . '. Your account is now active.')
+            ->line('Explore our wide range of products and start shopping today!')
             ->action('Visit Dashboard', route('home'))
-            ->line('Thank you for joining us!');
+            ->line('If you have any questions, contact us at support@' . config('app.name') . '.');
     }
 
-    public function toDatabase($notifiable)
+    public function toDatabase($notifiable): array
     {
         return [
-            'message' => 'Welcome, ' . $this->user->name . '!',
+            'type' => 'welcome',
+            'message' => 'Welcome, ' . $this->user->name . '! Your account is ready.',
+            'user_id' => $this->user->id,
+            'url' => route('home'),
+            'created_at' => now()->toDateTimeString(),
         ];
     }
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
+
     public function toArray(object $notifiable): array
     {
-        return [
-            //
-        ];
+        return $this->toDatabase($notifiable);
     }
 }

@@ -26,6 +26,7 @@ class User extends Authenticatable
         'last_otp_request_date',
         'status',
         'entry_user_id',
+        'otp_verification_token'
     ];
     protected $casts = [
         'email_verified_at' => 'datetime',

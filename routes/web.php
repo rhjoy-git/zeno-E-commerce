@@ -51,8 +51,10 @@ Route::prefix('cart')->group(function () {
 
 Route::middleware('guest')->group(function () {
     // Registration
-    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('/register', [RegisterController::class, 'register']);
+    Route::middleware(['throttle:60,1'])->group(function () {
+        Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register.form');
+        Route::post('/register', [RegisterController::class, 'register'])->name('register');
+    });
 
     // Login
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -67,9 +69,13 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
 
     // OTP Verification
-    Route::get('/otp/verify/{email}', [OTPVerificationController::class, 'showOtpForm'])->name('otp.verify');
-    Route::post('/otp/verify', [OTPVerificationController::class, 'verifyOtp'])->name('otp.verify.post');
-    Route::post('/otp/resend/{email}', [OTPVerificationController::class, 'resendOtp'])->name('otp.resend');
+    Route::middleware(['throttle:10,1'])->group(function () {
+        Route::get('/otp/verify/{token}', [OTPVerificationController::class, 'showOtpForm'])->name('otp.verify');
+        Route::post('/otp/verify', [OTPVerificationController::class, 'verifyOtp'])->name('otp.verify.post');
+    });
+    Route::middleware(['throttle:5,1'])->group(function () {
+        Route::post('/otp/resend/{token}', [OTPVerificationController::class, 'resendOtp'])->name('otp.resend');
+    });
     Route::get('/otp/resend/{email}', [OTPVerificationController::class, 'resendOtp'])->name('otp.resend.get');
 });
 
