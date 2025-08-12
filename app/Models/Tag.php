@@ -10,13 +10,11 @@ use Illuminate\Support\Facades\Auth;
 class Tag extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'name',
         'created_by',
         'updated_by',
     ];
-
     public function products()
     {
         return $this->belongsToMany(
@@ -26,14 +24,12 @@ class Tag extends Model
             'product_id'
         );
     }
-
     protected static function booted()
     {
         static::creating(function ($tag) {
             $tag->created_by = Auth::id() ?? null;
             $tag->updated_by = Auth::id() ?? null;
         });
-
         static::updating(function ($tag) {
             $tag->updated_by = Auth::id() ?? null;
         });

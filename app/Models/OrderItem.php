@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Auth;
 class OrderItem extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'order_id',
         'product_id',
@@ -35,7 +34,6 @@ class OrderItem extends Model
         'created_by',
         'updated_by',
     ];
-
     protected $casts = [
         'price' => 'decimal:2',
         'original_price' => 'decimal:2',
@@ -48,29 +46,28 @@ class OrderItem extends Model
         'fulfillment_status' => 'string',
         'variant_options' => 'array',
     ];
-
     public function order()
     {
         return $this->belongsTo(Order::class);
     }
-
     public function product()
     {
         return $this->belongsTo(Product::class);
     }
-
     public function productVariant()
     {
         return $this->belongsTo(ProductVariant::class);
     }
-
+    public function scopeFulfilled($query)
+    {
+        return $query->where('fulfillment_status', 'fulfilled');
+    }
     protected static function booted()
     {
         static::creating(function ($orderItem) {
             $orderItem->created_by = Auth::id() ?? null;
             $orderItem->updated_by = Auth::id() ?? null;
         });
-
         static::updating(function ($orderItem) {
             $orderItem->updated_by = Auth::id() ?? null;
         });

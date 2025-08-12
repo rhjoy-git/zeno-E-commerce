@@ -19,13 +19,21 @@ class User extends Authenticatable
         'role_id',
         'otp',
         'otp_expires_at',
+        'otp_attempts',
+        'otp_last_attempt',
         'otp_blocked_until',
-        'otp_last_sent_at'
+        'otp_requests_today',
+        'last_otp_request_date',
+        'status',
+        'entry_user_id',
     ];
     protected $casts = [
+        'email_verified_at' => 'datetime',
         'otp_expires_at' => 'datetime',
+        'otp_last_attempt' => 'datetime',
         'otp_blocked_until' => 'datetime',
-        'otp_last_sent_at' => 'datetime'
+        'last_otp_request_date' => 'date',
+        'status' => 'string',
     ];
     public function role()
     {
@@ -35,32 +43,20 @@ class User extends Authenticatable
     {
         return $this->hasOne(CustomerProfile::class);
     }
-
     public function productWishes()
     {
         return $this->hasMany(ProductWish::class);
     }
-
     public function productCarts()
     {
         return $this->hasMany(ProductCart::class);
     }
-
-    public function invoices()
+    public function orders()
     {
-        return $this->hasMany(Invoice::class);
-    }
-
-    public function invoiceProducts()
-    {
-        return $this->hasMany(InvoiceProduct::class);
+        return $this->hasMany(Order::class);
     }
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPasswordNotification($token));
-    }
-    public function cartItems()
-    {
-        return $this->hasMany(ProductCart::class);
     }
 }

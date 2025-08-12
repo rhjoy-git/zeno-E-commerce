@@ -4,15 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 
 class District extends Model
 {
+    use HasFactory;
     protected $fillable = ['name', 'division_id'];
-
-    /**
-     * Get the division that owns the district.
-     */
-    public function division(): BelongsTo
+    public function division()
     {
         return $this->belongsTo(Division::class);
     }

@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Auth;
 class ProductCart extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'user_id',
         'product_id',
+        'variant_id',
         'color',
         'size',
         'qty',
@@ -20,29 +20,28 @@ class ProductCart extends Model
         'created_by',
         'updated_by',
     ];
-
     protected $casts = [
         'qty' => 'integer',
         'price' => 'decimal:2',
     ];
-
     public function product()
     {
         return $this->belongsTo(Product::class);
     }
-
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-
+    public function productVariant()
+    {
+        return $this->belongsTo(ProductVariant::class, 'variant_id');
+    }
     protected static function booted()
     {
         static::creating(function ($cart) {
             $cart->created_by = Auth::id() ?? null;
             $cart->updated_by = Auth::id() ?? null;
         });
-
         static::updating(function ($cart) {
             $cart->updated_by = Auth::id() ?? null;
         });

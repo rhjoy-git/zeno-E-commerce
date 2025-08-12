@@ -9,20 +9,21 @@ use Illuminate\Support\Facades\Auth;
 class ProductSize extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'name',
         'created_by',
         'updated_by',
     ];
-
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
     protected static function booted()
     {
         static::creating(function ($size) {
             $size->created_by = Auth::id() ?? null;
             $size->updated_by = Auth::id() ?? null;
         });
-
         static::updating(function ($size) {
             $size->updated_by = Auth::id() ?? null;
         });

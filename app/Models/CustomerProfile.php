@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class CustomerProfile extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'cus_name',
         'cus_address',
@@ -15,19 +17,27 @@ class CustomerProfile extends Model
         'cus_country',
         'cus_phone',
         'cus_fax',
-        'ship_name',
-        'ship_add',
-        'ship_city',
-        'ship_state',
-        'ship_postcode',
-        'ship_country',
-        'ship_phone'
+        'user_id',
+        'entry_user_id',
     ];
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    public function reviews() {
+    public function reviews()
+    {
         return $this->hasMany(ProductReview::class, 'customer_id');
+    }
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+    public function division()
+    {
+        return $this->belongsTo(Division::class);
+    }
+    public function district()
+    {
+        return $this->belongsTo(District::class);
     }
 }

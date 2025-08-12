@@ -15,11 +15,11 @@ class ProductFactory extends Factory
         $admin = User::where('role_id', Role::where('slug', 'admin')->first()->id)->first() ?? User::factory()->create([
             'role_id' => Role::where('slug', 'admin')->first()->id ?? Role::factory()->create(['slug' => 'admin'])->id
         ]);
-
+        $price = $this->faker->randomFloat(2, 100, 1000);
         return [
             'title' => $this->faker->words(3, true),
             'short_description' => $this->faker->sentence,
-            'price' => $this->faker->randomFloat(2, 100, 1000),
+            'price' => $price,
             'discount' => $this->faker->boolean(30),
             'discount_price' => fn(array $attributes) => $attributes['discount'] ? $attributes['price'] * 0.8 : null,
             'stock_quantity' => $this->faker->numberBetween(10, 100),
