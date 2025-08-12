@@ -1,7 +1,11 @@
 <?php
 
 return [
-
+    
+    'notifications' => [
+        'driver' => 'database',
+        'queue' => 'notifications',
+    ],
     /*
     |--------------------------------------------------------------------------
     | Default Queue Connection Name

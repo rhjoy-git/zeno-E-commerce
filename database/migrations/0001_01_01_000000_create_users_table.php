@@ -21,13 +21,16 @@ return new class extends Migration
             $table->timestamp('otp_expires_at')->nullable();
             $table->unsignedTinyInteger('otp_attempts')->default(0);
             $table->timestamp('otp_last_attempt')->nullable();
+            $table->string('otp_verification_token')->nullable();
+            $table->timestamp('last_otp_request_at')->nullable();
             $table->timestamp('otp_blocked_until')->nullable();
             $table->unsignedSmallInteger('otp_requests_today')->default(0);
             $table->date('last_otp_request_date')->nullable();
             $table->rememberToken();
             $table->enum('status', ['active', 'inactive', 'banned'])->default('active');
             $table->timestamps();
-            $table->unsignedInteger('entry_user_id')->nullable();
+            $table->unsignedBigInteger('entry_user_id')->nullable();
+            $table->foreign('entry_user_id')->references('id')->on('users')->onDelete('set null');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

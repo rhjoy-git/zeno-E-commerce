@@ -9,11 +9,16 @@ use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class RegisterController extends Controller
 {
     public function showRegistrationForm()
     {
+        if (!view()->exists('auth.register')) {
+            Log::error('Registration view auth.register not found.');
+            abort(404, 'Registration form not available.');
+        }
         return view('auth.register');
     }
 
@@ -28,25 +33,34 @@ class RegisterController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create user without logging in yet
+            $customerRole = Role::where('slug', 'customer')->first();
+            if (!$customerRole) {
+                throw new \Exception('Customer role not found. Please contact support.');
+            }
+
             $user = User::create([
                 'name' => trim($validated['name']),
                 'email' => strtolower(trim($validated['email'])),
                 'password' => Hash::make($validated['password']),
-                'role_id' => Role::where('slug', 'customer')->first()->id
+                'role_id' => $customerRole->id,
+                'status' => 'active',
+                'otp_attempts' => 0,
+                'otp_requests_today' => 0,
+                'entry_user_id' => null,
+                'last_otp_request_at' => null,
+                'otp_verification_token' => null,
             ]);
 
-            // Generate and send OTP
             $otpService = new OtpService();
-            $otpService->generateAndSendOtp($user);
+            $token = $otpService->generateAndSendOtp($user);
             DB::commit();
 
-            // Redirect to OTP verification page
-            return redirect()->route('otp.verify', ['email' => $user->email])
+            return redirect()->route('otp.verify', ['token' => $token])
                 ->with('success', 'OTP sent to your email!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Registration failed: ' . $e->getMessage());
+            Log::error('Registration failed: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Registration failed. Please try again.');
         }
     }
     protected function redirectPath()

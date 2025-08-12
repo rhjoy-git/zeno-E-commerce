@@ -11,10 +11,21 @@ use Illuminate\Support\Facades\Log;
 class SendWelcomeMessage implements ShouldQueue
 {
     use InteractsWithQueue;
-    
+
+    public $tries = 3;
+
     public function handle(UserRegistered $event): void
     {
-        Log::info("WelcomeNotification dispatched for user: {$event->user->email}");
-        $event->user->notify(new WelcomeNotification($event->user));
+        if (!$event->user->email_verified_at) {
+            Log::warning('UserRegistered event fired for unverified user: ' . $event->user->id);
+            return;
+        }
+
+        try {
+            $event->user->notify(new WelcomeNotification($event->user));
+        } catch (\Exception $e) {
+            Log::error('Failed to send welcome notification for user ' . $event->user->id . ': ' . $e->getMessage());
+            $this->release(60);
+        }
     }
 }

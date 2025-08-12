@@ -10,11 +10,11 @@ use Illuminate\Queue\SerializesModels;
 class UserRegistered
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
+
     public $user;
 
     public function __construct(User $user)
     {
         $this->user = $user;
     }
-   
 }
