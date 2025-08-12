@@ -22,6 +22,8 @@ return new class extends Migration
             $table->integer('usage_limit')->nullable();
             $table->integer('used_count')->default(0);
             $table->boolean('is_active')->default(true);
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
 
@@ -29,10 +31,13 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->decimal('rate', 5, 2);
-            $table->string('region')->nullable(); // Could be country/state specific
+            $table->string('region')->nullable(); 
             $table->boolean('is_active')->default(true);
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
+        
     }
 
     /**

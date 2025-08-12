@@ -13,9 +13,8 @@ use App\Models\Color;
 use App\Models\ProductSize;
 use App\Models\User;
 use App\Models\Role;
-use Illuminate\Database\Seeder;
-
 use Faker\Factory as Faker;
+use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
 {
@@ -25,30 +24,16 @@ class ProductSeeder extends Seeder
     {
         $this->faker = Faker::create();
     }
+
     public function run(): void
     {
-        // Ensure admin user exists
         $admin = User::where('role_id', Role::where('slug', 'admin')->first()->id)->first() ?? User::factory()->create([
             'role_id' => Role::where('slug', 'admin')->first()->id ?? Role::factory()->create(['slug' => 'admin'])->id
         ]);
-
-        // Ensure tags exist
         $popularTag = Tag::firstOrCreate(['name' => 'popular', 'created_by' => $admin->id, 'updated_by' => $admin->id]);
         $newTag = Tag::firstOrCreate(['name' => 'new', 'created_by' => $admin->id, 'updated_by' => $admin->id]);
-
-        // Ensure colors and sizes exist
-        $colors = [
-            Color::firstOrCreate(['name' => 'Black', 'hex_code' => '#000000', 'created_by' => $admin->id, 'updated_by' => $admin->id]),
-            Color::firstOrCreate(['name' => 'White', 'hex_code' => '#FFFFFF', 'created_by' => $admin->id, 'updated_by' => $admin->id]),
-            Color::firstOrCreate(['name' => 'Blue', 'hex_code' => '#0000FF', 'created_by' => $admin->id, 'updated_by' => $admin->id]),
-        ];
-        $sizes = [
-            ProductSize::firstOrCreate(['name' => 'M', 'created_by' => $admin->id, 'updated_by' => $admin->id]),
-            ProductSize::firstOrCreate(['name' => 'L', 'created_by' => $admin->id, 'updated_by' => $admin->id]),
-            ProductSize::firstOrCreate(['name' => 'XL', 'created_by' => $admin->id, 'updated_by' => $admin->id]),
-        ];
-
-        // Create one specific product
+        $colors = Color::all()->isEmpty() ? Color::factory()->count(3)->create(['created_by' => $admin->id, 'updated_by' => $admin->id]) : Color::all();
+        $sizes = ProductSize::all()->isEmpty() ? ProductSize::factory()->count(3)->create(['created_by' => $admin->id, 'updated_by' => $admin->id]) : ProductSize::all();
         $product = Product::create([
             'title' => 'Sample T-Shirt',
             'short_description' => 'A high-quality cotton t-shirt for daily wear.',
@@ -65,29 +50,24 @@ class ProductSeeder extends Seeder
             'created_by' => $admin->id,
             'updated_by' => $admin->id,
         ]);
-
-        // Attach tags to product
         $product->tags()->attach([$popularTag->id, $newTag->id], ['created_by' => $admin->id, 'updated_by' => $admin->id]);
-
-        // Create product variants for the specific product
         $variantConfigs = [
-            ['color' => $colors[0], 'size' => $sizes[0], 'price' => 500, 'stock_quantity' => 50, 'sku' => 'SKU-123AB-M'],
-            ['color' => $colors[0], 'size' => $sizes[1], 'price' => 550, 'stock_quantity' => 30, 'sku' => 'SKU-123AB-L'],
-            ['color' => $colors[0], 'size' => $sizes[2], 'price' => 600, 'stock_quantity' => 20, 'sku' => 'SKU-123AB-XL'],
-            ['color' => $colors[1], 'size' => $sizes[0], 'price' => 500, 'stock_quantity' => 50, 'sku' => 'SKU-123AB-WM'],
-            ['color' => $colors[1], 'size' => $sizes[1], 'price' => 550, 'stock_quantity' => 30, 'sku' => 'SKU-123AB-WL'],
-            ['color' => $colors[1], 'size' => $sizes[2], 'price' => 600, 'stock_quantity' => 20, 'sku' => 'SKU-123AB-WXL'],
-            ['color' => $colors[2], 'size' => $sizes[0], 'price' => 500, 'stock_quantity' => 50, 'sku' => 'SKU-123AB-BM'],
-            ['color' => $colors[2], 'size' => $sizes[1], 'price' => 550, 'stock_quantity' => 30, 'sku' => 'SKU-123AB-BL'],
-            ['color' => $colors[2], 'size' => $sizes[2], 'price' => 600, 'stock_quantity' => 20, 'sku' => 'SKU-123AB-BXL'],
+            ['color_id' => $colors[0]->id, 'size_id' => $sizes[0]->id, 'price' => 500, 'stock_quantity' => 50, 'sku' => 'SKU-123AB-M'],
+            ['color_id' => $colors[0]->id, 'size_id' => $sizes[1]->id, 'price' => 550, 'stock_quantity' => 30, 'sku' => 'SKU-123AB-L'],
+            ['color_id' => $colors[0]->id, 'size_id' => $sizes[2]->id, 'price' => 600, 'stock_quantity' => 20, 'sku' => 'SKU-123AB-XL'],
+            ['color_id' => $colors[1]->id, 'size_id' => $sizes[0]->id, 'price' => 500, 'stock_quantity' => 50, 'sku' => 'SKU-123AB-WM'],
+            ['color_id' => $colors[1]->id, 'size_id' => $sizes[1]->id, 'price' => 550, 'stock_quantity' => 30, 'sku' => 'SKU-123AB-WL'],
+            ['color_id' => $colors[1]->id, 'size_id' => $sizes[2]->id, 'price' => 600, 'stock_quantity' => 20, 'sku' => 'SKU-123AB-WXL'],
+            ['color_id' => $colors[2]->id, 'size_id' => $sizes[0]->id, 'price' => 500, 'stock_quantity' => 50, 'sku' => 'SKU-123AB-BM'],
+            ['color_id' => $colors[2]->id, 'size_id' => $sizes[1]->id, 'price' => 550, 'stock_quantity' => 30, 'sku' => 'SKU-123AB-BL'],
+            ['color_id' => $colors[2]->id, 'size_id' => $sizes[2]->id, 'price' => 600, 'stock_quantity' => 20, 'sku' => 'SKU-123AB-BXL'],
         ];
-
         $variantIds = [];
         foreach ($variantConfigs as $config) {
             $variant = ProductVariant::create([
                 'product_id' => $product->id,
-                'color_id' => $config['color']->id,
-                'size_id' => $config['size']->id,
+                'color_id' => $config['color_id'],
+                'size_id' => $config['size_id'],
                 'price' => $config['price'],
                 'stock_quantity' => $config['stock_quantity'],
                 'stock_alert' => 5,
@@ -98,8 +78,6 @@ class ProductSeeder extends Seeder
             ]);
             $variantIds[] = $variant->id;
         }
-
-        // Add product detail
         ProductDetail::create([
             'product_id' => $product->id,
             'description' => 'This is a comfortable and breathable t-shirt suitable for all seasons.',
@@ -108,20 +86,16 @@ class ProductSeeder extends Seeder
             'created_by' => $admin->id,
             'updated_by' => $admin->id,
         ]);
-
-        // Add product images linked to variants
         foreach (array_slice($variantIds, 0, 3) as $index => $variantId) {
             ProductImage::create([
                 'product_id' => $product->id,
-                'image_path' => "images/products/" . ($index + 1) . ".jpg",
+                'image_path' => "storage/products/{$product->id}-" . ($index + 1) . ".jpg",
                 'variant_id' => $variantId,
                 'is_primary' => $index === 0,
                 'created_by' => $admin->id,
                 'updated_by' => $admin->id,
             ]);
         }
-
-        // Create additional products using factory
         Product::factory()->count(9)->create([
             'created_by' => $admin->id,
             'updated_by' => $admin->id,
@@ -129,20 +103,15 @@ class ProductSeeder extends Seeder
             'brand_id' => fn() => Brand::inRandomOrder()->first()->id ?? Brand::factory()->create()->id,
         ])->each(function ($product) use ($admin, $colors, $sizes, $popularTag, $newTag) {
             $product->tags()->attach([$popularTag->id, $newTag->id], ['created_by' => $admin->id, 'updated_by' => $admin->id]);
-
-            // Generate unique color-size combinations
             $availableCombinations = [];
             foreach ($colors as $color) {
                 foreach ($sizes as $size) {
                     $availableCombinations[] = ['color_id' => $color->id, 'size_id' => $size->id];
                 }
             }
-            // Shuffle and select 2-4 unique combinations
             shuffle($availableCombinations);
             $variantCount = rand(2, 4);
             $selectedCombinations = array_slice($availableCombinations, 0, $variantCount);
-
-            // Create variants
             foreach ($selectedCombinations as $index => $combo) {
                 $variant = ProductVariant::create([
                     'product_id' => $product->id,
@@ -151,22 +120,20 @@ class ProductSeeder extends Seeder
                     'price' => $this->faker->randomFloat(2, 400, 600),
                     'stock_quantity' => $this->faker->numberBetween(10, 50),
                     'stock_alert' => 5,
-                    'sku' => $this->faker->unique()->bothify('SKU-###??-' . $product->id . '-' . $index),
+                    'sku' => $this->faker->unique()->bothify("SKU-{$product->id}-{$index}-##??"),
                     'status' => 'active',
                     'created_by' => $admin->id,
                     'updated_by' => $admin->id,
                 ]);
-
                 ProductImage::create([
                     'product_id' => $product->id,
-                    'image_path' => "images/products/" . ($product->id) . "-" . ($index + 1) . ".jpg",
+                    'image_path' => "storage/products/{$product->id}-" . ($index + 1) . ".jpg",
                     'variant_id' => $variant->id,
                     'is_primary' => $index === 0,
                     'created_by' => $admin->id,
                     'updated_by' => $admin->id,
                 ]);
             }
-
             ProductDetail::create([
                 'product_id' => $product->id,
                 'description' => $this->faker->paragraph,

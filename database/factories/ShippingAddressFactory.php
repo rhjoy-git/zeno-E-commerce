@@ -10,8 +10,10 @@ class ShippingAddressFactory extends Factory
 {
     public function definition()
     {
-        $user = User::where('role_id', Role::where('slug', 'customer')->first()->id)->inRandomOrder()->first() ?? User::factory()->create(['role_id' => Role::where('slug', 'customer')->first()->id]);
-
+        $customerRole = Role::where('slug', 'customer')->first() ?? Role::factory()->create(['slug' => 'customer']);
+        $adminRole = Role::where('slug', 'admin')->first() ?? Role::factory()->create(['slug' => 'admin']);
+        $user = User::where('role_id', $customerRole->id)->inRandomOrder()->first() ?? User::factory()->create(['role_id' => $customerRole->id]);
+        $admin = User::where('role_id', $adminRole->id)->inRandomOrder()->first() ?? User::factory()->create(['role_id' => $adminRole->id]);
         return [
             'user_id' => $user->id,
             'name' => $this->faker->name,
@@ -22,8 +24,8 @@ class ShippingAddressFactory extends Factory
             'postal_code' => $this->faker->postcode,
             'phone' => $this->faker->phoneNumber,
             'is_default' => $this->faker->boolean(20),
-            'created_by' => User::where('role_id', Role::where('slug', 'admin')->first()->id)->inRandomOrder()->first()->id ?? 1,
-            'updated_by' => User::where('role_id', Role::where('slug', 'admin')->first()->id)->inRandomOrder()->first()->id ?? 1,
+            'created_by' => $admin->id,
+            'updated_by' => $admin->id,
         ];
     }
 }

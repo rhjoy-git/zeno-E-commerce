@@ -11,26 +11,34 @@ class OrderFactory extends Factory
 {
     public function definition()
     {
-        $user = User::where('role_id', Role::where('slug', 'customer')->first()->id)->inRandomOrder()->first() ?? User::factory()->create([
-            'role_id' => Role::where('slug', 'customer')->first()->id ?? Role::factory()->create(['slug' => 'customer'])->id
+        $customerRole = Role::where('slug', 'customer')->first() ?? Role::factory()->create(['slug' => 'customer']);
+        $adminRole = Role::where('slug', 'admin')->first() ?? Role::factory()->create(['slug' => 'admin']);
+        $user = User::where('role_id', $customerRole->id)->inRandomOrder()->first() ?? User::factory()->create([
+            'role_id' => $customerRole->id
         ]);
-        $admin = User::where('role_id', Role::where('slug', 'admin')->first()->id)->inRandomOrder()->first() ?? User::factory()->create([
-            'role_id' => Role::where('slug', 'admin')->first()->id ?? Role::factory()->create(['slug' => 'admin'])->id
+        $admin = User::where('role_id', $adminRole->id)->inRandomOrder()->first() ?? User::factory()->create([
+            'role_id' => $adminRole->id
         ]);
-
+        $status = $this->faker->randomElement(['pending', 'confirmed', 'processing', 'shipped', 'delivered']);
+        $subtotal = $this->faker->randomFloat(2, 100, 5000);
+        $discount_amount = $this->faker->randomFloat(2, 0, $subtotal * 0.2);
+        $tax_amount = $this->faker->randomFloat(2, 0, 50);
+        $shipping_amount = $this->faker->randomFloat(2, 0, 50);
+        $total = $subtotal - $discount_amount + $tax_amount + $shipping_amount;
+        $payment_status = $this->faker->randomElement(['pending', 'paid', 'partially_paid']);
         return [
             'order_number' => $this->faker->unique()->bothify('ORD-#####'),
             'invoice_number' => $this->faker->unique()->bothify('INV-#####'),
-            'status' => $this->faker->randomElement(['pending', 'confirmed', 'processing', 'shipped', 'delivered']),
-            'subtotal' => $this->faker->randomFloat(2, 100, 5000),
-            'discount_amount' => $this->faker->randomFloat(2, 0, 100),
-            'tax_amount' => $this->faker->randomFloat(2, 0, 50),
-            'shipping_amount' => $this->faker->randomFloat(2, 0, 50),
-            'total' => fn(array $attributes) => $attributes['subtotal'] - $attributes['discount_amount'] + $attributes['tax_amount'] + $attributes['shipping_amount'],
-            'total_paid' => fn(array $attributes) => $attributes['status'] === 'delivered' ? $attributes['total'] : 0,
+            'status' => $status,
+            'subtotal' => $subtotal,
+            'discount_amount' => $discount_amount,
+            'tax_amount' => $tax_amount,
+            'shipping_amount' => $shipping_amount,
+            'total' => $total,
+            'total_paid' => $payment_status === 'paid' ? $total : ($payment_status === 'partially_paid' ? $this->faker->randomFloat(2, $total * 0.5, $total) : 0),
             'total_refunded' => 0,
             'currency' => 'USD',
-            'payment_status' => $this->faker->randomElement(['pending', 'paid', 'partially_paid']),
+            'payment_status' => $payment_status,
             'payment_method' => $this->faker->randomElement(['credit_card', 'paypal', 'bank_transfer']),
             'transaction_id' => $this->faker->uuid,
             'payment_notes' => $this->faker->optional()->sentence,
@@ -43,12 +51,12 @@ class OrderFactory extends Factory
             'customer_email' => $user->email,
             'customer_phone' => $this->faker->phoneNumber,
             'customer_ip' => $this->faker->ipv4,
-            'confirmed_at' => $this->faker->optional()->dateTime,
-            'paid_at' => $this->faker->optional()->dateTime,
-            'processing_at' => $this->faker->optional()->dateTime,
-            'shipped_at' => $this->faker->optional()->dateTime,
-            'delivered_at' => $this->faker->optional()->dateTime,
-            'cancelled_at' => $this->faker->optional()->dateTime,
+            'confirmed_at' => $status !== 'pending' ? $this->faker->dateTimeThisYear : null,
+            'paid_at' => $payment_status !== 'pending' ? $this->faker->dateTimeThisYear : null,
+            'processing_at' => in_array($status, ['processing', 'shipped', 'delivered']) ? $this->faker->dateTimeThisYear : null,
+            'shipped_at' => in_array($status, ['shipped', 'delivered']) ? $this->faker->dateTimeThisYear : null,
+            'delivered_at' => $status === 'delivered' ? $this->faker->dateTimeThisYear : null,
+            'cancelled_at' => $status === 'cancelled' ? $this->faker->dateTimeThisYear : null,
             'notes' => $this->faker->optional()->sentence,
             'admin_notes' => $this->faker->optional()->sentence,
             'created_by' => $admin->id,

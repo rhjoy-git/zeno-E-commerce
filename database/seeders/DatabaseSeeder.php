@@ -2,21 +2,25 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Seeder;
+use Database\Seeders\RoleSeeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\BrandSeeder;
-use Database\Seeders\ProductSeeder;
 use Database\Seeders\ColorSeeder;
+use Database\Seeders\ProductSizeSeeder;
+use Database\Seeders\TagSeeder;
+use Database\Seeders\CouponSeeder;
+use Database\Seeders\TaxRateSeeder;
+use Database\Seeders\SslcommerzAccountSeeder;
+use Database\Seeders\ShippingAddressSeeder;
+use Database\Seeders\ProductSeeder;
 use Database\Seeders\ProductReviewSeeder;
 use Database\Seeders\PolicySeeder;
+use Database\Seeders\OrderSeeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         $this->call([
@@ -24,14 +28,17 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CategorySeeder::class,
             BrandSeeder::class,
-            ProductSizeSeeder::class,
             ColorSeeder::class,
+            ProductSizeSeeder::class,
+            TagSeeder::class,
+            CouponSeeder::class,
+            TaxRateSeeder::class,
+            SslcommerzAccountSeeder::class,
             ShippingAddressSeeder::class,
             ProductSeeder::class,
             ProductReviewSeeder::class,
             PolicySeeder::class,
             OrderSeeder::class,
-            OrderItemSeeder::class,
         ]);
     }
 }

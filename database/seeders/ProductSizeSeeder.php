@@ -2,27 +2,29 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\ProductSize;
+use App\Models\User;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ProductSizeSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        DB::table('product_sizes')->insert([
-            ['name' => 'XS', 'created_by' => 1, 'updated_by' => 1],
-            ['name' => 'S', 'created_by' => 1, 'updated_by' => 1],
-            ['name' => 'M', 'created_by' => 1, 'updated_by' => 1],
-            ['name' => 'L', 'created_by' => 1, 'updated_by' => 1],
-            ['name' => 'XL', 'created_by' => 1, 'updated_by' => 1],
-            ['name' => 'XXL', 'created_by' => 1, 'updated_by' => 1],
-            ['name' => '38', 'created_by' => 1, 'updated_by' => 1],
-            ['name' => '39', 'created_by' => 1, 'updated_by' => 1],
-            ['name' => '42', 'created_by' => 1, 'updated_by' => 1],
+        $admin = User::where('role_id', Role::where('slug', 'admin')->first()->id)->first() ?? User::factory()->create([
+            'role_id' => Role::where('slug', 'admin')->first()->id ?? Role::factory()->create(['slug' => 'admin'])->id
         ]);
+        $sizes = [
+            ['name' => 'XS', 'created_by' => $admin->id, 'updated_by' => $admin->id],
+            ['name' => 'S', 'created_by' => $admin->id, 'updated_by' => $admin->id],
+            ['name' => 'M', 'created_by' => $admin->id, 'updated_by' => $admin->id],
+            ['name' => 'L', 'created_by' => $admin->id, 'updated_by' => $admin->id],
+            ['name' => 'XL', 'created_by' => $admin->id, 'updated_by' => $admin->id],
+            ['name' => 'XXL', 'created_by' => $admin->id, 'updated_by' => $admin->id],
+            ['name' => '38', 'created_by' => $admin->id, 'updated_by' => $admin->id],
+            ['name' => '39', 'created_by' => $admin->id, 'updated_by' => $admin->id],
+            ['name' => '42', 'created_by' => $admin->id, 'updated_by' => $admin->id],
+        ];
+        ProductSize::upsert($sizes, ['name'], ['created_by', 'updated_by']);
     }
 }

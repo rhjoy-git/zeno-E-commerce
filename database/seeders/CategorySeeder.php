@@ -3,21 +3,42 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\User;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
 {
     public function run(): void
     {
-        $categories = [
-            ['category_name' => 'Electronics', 'category_image' => 'https://picsum.photos/200', 'status' => 'active', 'parent_id' => null, 'created_by' => 1, 'updated_by' => 1],
-            ['category_name' => 'Clothing', 'category_image' => 'https://picsum.photos/201', 'status' => 'active', 'parent_id' => null, 'created_by' => 1, 'updated_by' => 1],
-            ['category_name' => 'Books', 'category_image' => 'https://picsum.photos/202', 'status' => 'active', 'parent_id' => null, 'created_by' => 1, 'updated_by' => 1],
-            ['category_name' => 'Home & Kitchen', 'category_image' => 'https://picsum.photos/203', 'status' => 'active', 'parent_id' => null, 'created_by' => 1, 'updated_by' => 1],
-        ];
+        // Ensure there is an admin user
+        $adminRoleId = Role::where('slug', 'admin')->first()->id
+            ?? Role::factory()->create(['slug' => 'admin'])->id;
 
-        foreach ($categories as $category) {
-            Category::create($category);
-        }
+        $admin = User::where('role_id', $adminRoleId)->first()
+            ?? User::factory()->create(['role_id' => $adminRoleId]);
+
+        // Parent categories
+        $electronics = $this->createCategory('Electronics', 'storage/categories/electronics.jpg', $admin->id);
+        $clothing    = $this->createCategory('Clothing', 'storage/categories/clothing.jpg', $admin->id);
+        $books       = $this->createCategory('Books', 'storage/categories/books.jpg', $admin->id);
+
+        // Child categories
+        $this->createCategory('Smartphones', 'storage/categories/smartphones.jpg', $admin->id, $electronics->id);
+        $this->createCategory('Laptops', 'storage/categories/laptops.jpg', $admin->id, $electronics->id);
+        $this->createCategory('Men\'s Clothing', 'storage/categories/mens_clothing.jpg', $admin->id, $clothing->id);
+        $this->createCategory('Fiction Books', 'storage/categories/fiction_books.jpg', $admin->id, $books->id);
+    }
+
+    private function createCategory(string $name, string $image, int $userId, ?int $parentId = null): Category
+    {
+        return Category::create([
+            'category_name' => $name,
+            'category_image' => $image,
+            'status' => 'active',
+            'parent_id' => $parentId,
+            'created_by' => $userId,
+            'updated_by' => $userId,
+        ]);
     }
 }
