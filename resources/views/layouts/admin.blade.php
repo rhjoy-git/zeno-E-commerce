@@ -14,7 +14,12 @@
     <link rel="stylesheet" href="{{ asset('css/preloader.css') }}">
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
+    <style>
+        #upload-box {
+            transition: border-color 0.2s ease;        
+        }
+        
+    </style>
     <title>Zeno - @yield('title')</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -83,7 +88,8 @@
             <div class="flex-1 overflow-y-auto">
                 {{-- Admin Header --}}
                 @include('admin.partials.bashboard-header')
-                
+                @include('partials.flash-messages')
+
                 @yield('content')
             </div>
         </div>

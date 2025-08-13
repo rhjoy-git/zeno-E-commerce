@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Brand;
 use App\Models\Color;
 use App\Models\ProductSize;
+use App\Models\Tag;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -81,6 +82,7 @@ class ProductController extends Controller
             'brandSelected' => $brand?->id,
             'colors' => Color::all(),
             'sizes' => ProductSize::all(),
+            'tags' => Tag::all(),
         ]);
     }
 
@@ -91,7 +93,7 @@ class ProductController extends Controller
     {
         try {
             DB::beginTransaction();
-            // dd($request->all());
+            dd($request->all());
             // Validate the request data
             $validated = $request->validate([
                 'title' => 'required|string|max:200',

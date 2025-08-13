@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->string('sku', 50)->unique();
             $table->enum('status', ['active', 'inactive', 'discontinued'])->default('active');
+            $table->boolean('has_variants')->default(false);
             $table->unsignedBigInteger('category_id')->nullable();
             $table->unsignedBigInteger('brand_id')->nullable();
             $table->foreign('category_id')->references('id')->on('categories')->nullOnDelete()->cascadeOnUpdate();
