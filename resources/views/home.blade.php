@@ -31,6 +31,7 @@
     <!-- Preloader -->
     @include('partials.preloader')
     @include('frontend.navbar')
+    @include('partials.flash-messages')
     @include('frontend.heroSection')
     @include('frontend.new-arrivals')
     <hr>
@@ -148,98 +149,98 @@
     <script src="{{ asset('js/preloader.js') }}"></script>
     <script src="{{ asset('js/notification.js') }}"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.add-to-cart').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const productId = btn.getAttribute('data-product-id');
-            const productPrice = btn.getAttribute('data-price');
-            const color = btn.getAttribute('data-color') ?? '';
-            const size = btn.getAttribute('data-size') ?? '';
-            const cartData = {
-                product_id: productId,
-                color: color,
-                size: size,
-                qty: 1,
-                price: productPrice
-            };
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.add-to-cart').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const productId = btn.getAttribute('data-product-id');
+                    const productPrice = btn.getAttribute('data-price');
+                    const color = btn.getAttribute('data-color') ?? '';
+                    const size = btn.getAttribute('data-size') ?? '';
+                    const cartData = {
+                        product_id: productId,
+                        color: color,
+                        size: size,
+                        qty: 1,
+                        price: productPrice
+                    };
 
-            // Show loading state
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    // Show loading state
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg> Adding...`;
-            btn.disabled = true;
-            console.log(cartData);
-            fetch('{{ route('cart.add') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector(
-                        'meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify(cartData)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Show success message
-                        NotificationSystem.show({
-                            type: 'success',
-                            title: 'Added to cart',
-                            message: data.message,
-
-                            duration: 5000,
-                            action: {
-                                text: 'View Cart',
-                                onclick: `window.location.href='{{ route('cart.items') }}'`
-                            }
-                        });
-                        updateCartCounter(data.cartCount);
-                        // Show warning if quantity was adjusted
-                        if (data.actualQtyAdded < cartData.qty) {
-                            setTimeout(() => {
+                    btn.disabled = true;
+                    console.log(cartData);
+                    fetch('{{ route('cart.add') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify(cartData)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Show success message
                                 NotificationSystem.show({
-                                    type: 'warning',
-                                    title: 'Quantity adjusted',
-                                    message: `Only ${data.actualQtyAdded} available in stock.`,
-                                    duration: 4000
-                                });
-                            }, 500);
-                        }
-                    } else {
-                        NotificationSystem.show({
-                            type: 'error',
-                            title: 'Failed to add to cart',
-                            message: data.message,
-                            duration: 5000
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    NotificationSystem.show({
-                        type: 'error',
-                        title: 'Error',
-                        message: 'An error occurred while adding to cart',
-                        duration: 5000
-                    });
-                })
-                .finally(() => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                });
-        });
-    });
+                                    type: 'success',
+                                    title: 'Added to cart',
+                                    message: data.message,
 
-    function updateCartCounter(count) {
-        const cartCounter = document.querySelector('.cart-counter');
-        if (cartCounter) {
-            cartCounter.textContent = count;
-        }
-    }
-});
+                                    duration: 5000,
+                                    action: {
+                                        text: 'View Cart',
+                                        onclick: `window.location.href='{{ route('cart.items') }}'`
+                                    }
+                                });
+                                updateCartCounter(data.cartCount);
+                                // Show warning if quantity was adjusted
+                                if (data.actualQtyAdded < cartData.qty) {
+                                    setTimeout(() => {
+                                        NotificationSystem.show({
+                                            type: 'warning',
+                                            title: 'Quantity adjusted',
+                                            message: `Only ${data.actualQtyAdded} available in stock.`,
+                                            duration: 4000
+                                        });
+                                    }, 500);
+                                }
+                            } else {
+                                NotificationSystem.show({
+                                    type: 'error',
+                                    title: 'Failed to add to cart',
+                                    message: data.message,
+                                    duration: 5000
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            NotificationSystem.show({
+                                type: 'error',
+                                title: 'Error',
+                                message: 'An error occurred while adding to cart',
+                                duration: 5000
+                            });
+                        })
+                        .finally(() => {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                        });
+                });
+            });
+
+            function updateCartCounter(count) {
+                const cartCounter = document.querySelector('.cart-counter');
+                if (cartCounter) {
+                    cartCounter.textContent = count;
+                }
+            }
+        });
     </script>
     @stack('scripts')
 </body>
