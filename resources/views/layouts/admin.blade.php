@@ -13,17 +13,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link rel="stylesheet" href="{{ asset('css/preloader.css') }}">
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>
-        #upload-box {
-            transition: border-color 0.2s ease;        
-        }
-        
-    </style>
+
     <title>Zeno - @yield('title')</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
+    @stack('styles')
 </head>
 
 <body class="font-sans antialiased bg-gray-100" x-data="{ mobileMenuOpen: false }">

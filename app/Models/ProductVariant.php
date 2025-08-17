@@ -51,6 +51,15 @@ class ProductVariant extends Model
     {
         return $query->where('status', 'active');
     }
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
+    public function getHasVariantsAttribute()
+    {
+        return $this->variants()->exists();
+    }
     protected static function booted()
     {
         static::creating(function ($variant) {

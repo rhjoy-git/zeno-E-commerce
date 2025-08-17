@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 @section('title', 'Products Management')
 @section('content')
-    <div class="container mx-auto px-4 py-6">
+    <div class="container mx-auto p-4">
         <!-- Filters Section -->
-        <div class="bg-white  p-4 mb-6">
+        <div class="bg-white  p-4 mb-3">
             <form method="GET" action="{{ route('admin.products.index') }}">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                     <!-- Search Input -->
@@ -30,7 +30,7 @@
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}"
                                     {{ request('category') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->categoryName }}</option>
+                                    {{ $category->category_name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -43,7 +43,7 @@
                             <option value="">All Brands</option>
                             @foreach ($brands as $brand)
                                 <option value="{{ $brand->id }}" {{ request('brand') == $brand->id ? 'selected' : '' }}>
-                                    {{ $brand->brandName }}
+                                    {{ $brand->brand_name }}
                                 </option>
                             @endforeach
                         </select>
@@ -108,7 +108,7 @@
             <!-- Products Table -->
             <div class="bg-white  overflow-hidden">
                 <!-- Page Header -->
-                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <div class="p-4 border-b border-gray-200 flex justify-between items-center">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800">Products Management</h1>
                         <p class="text-gray-600">Manage all products in your store</p>
@@ -198,7 +198,7 @@
                                             @endphp
                                             <span
                                                 class="px-2 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                {{ $discountPercent }}% OFF
+                                                {{ number_format($discountPercent, 2) }}% OFF
                                             </span>
                                         @endif
                                     </td>
@@ -284,6 +284,17 @@
 
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-base font-medium">
                                         <div class="flex justify-end space-x-2">
+                                            @if ($product->has_variants)
+                                                <a href="{{ route('admin.products.variants.index', $product->id) }}"
+                                                    class="text-purple-600 hover:text-purple-900" title="Manage Variants">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                                    </svg>
+                                                </a>
+                                            @endif
                                             <a href="{{ route('admin.products.edit', $product->id) }}"
                                                 class="text-blue-600 hover:text-blue-900">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
