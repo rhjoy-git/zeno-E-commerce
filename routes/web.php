@@ -35,7 +35,7 @@ use App\Http\Controllers\Admin\{
 
 use App\Http\Controllers\Admin\Product\{
     ProductController as AdminProductController,
-    VariantController
+    ProductVariantController
 };
 
 // ==================== PUBLIC ROUTES ====================
@@ -156,7 +156,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         ->name('products.updateStock');
 
     // Product Variants
-    Route::prefix('products/{product}/variants')->controller(VariantController::class)->group(function () {
+    Route::prefix('products/{product}/variants')->controller(ProductVariantController::class)->group(function () {
         Route::get('/', 'index')->name('products.variants.index');
         Route::get('/create', 'create')->name('products.variants.create');
         Route::post('/', 'store')->name('products.variants.store');

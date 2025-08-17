@@ -2,7 +2,7 @@
 @section('title', 'Create New Product')
 @section('content')
     <div class="container mx-auto p-4">
-        <div class="bg-white  shadow-md p-6">
+        <div class="bg-white shadow-md p-6">
             <div class="flex justify-between items-center py-2">
                 <h2 class="text-2xl font-bold text-gray-800">Add New Product</h2>
                 <a href="{{ route('admin.products.index') }}"

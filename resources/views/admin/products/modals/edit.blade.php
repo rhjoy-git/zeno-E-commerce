@@ -2,7 +2,7 @@
 @section('title', 'Edit Product - ' . $product->title)
 @section('content')
     <div class="container mx-auto p-4">
-        <div class="bg-white  p-6">
+        <div class="bg-white p-6">
             <div class="flex justify-between items-center py-2">
                 <h2 class="text-2xl font-bold text-gray-800">Edit Product: {{ $product->title }}</h2>
                 <a href="{{ route('admin.products.index') }}"

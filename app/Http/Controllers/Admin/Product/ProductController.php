@@ -93,17 +93,7 @@ class ProductController extends Controller
     }
 
     public function show(Product $product)
-    {
-        $product->load([
-            'category',
-            'brand',
-            'tags',
-            'images',
-            'variants.color',
-            'variants.size',
-            'reviews'
-        ]);
-
+    {        
         return view('admin.products.modals.show', compact('product'));
     }
 
