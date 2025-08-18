@@ -1,10 +1,9 @@
 @extends('layouts.admin')
 @section('title', 'Create New Product')
 @section('content')
-
-    <div class="container mx-auto px-4 py-6">
-        <div class="bg-white  shadow-md p-6">
-            <div class="flex justify-between items-center mb-6">
+    <div class="container mx-auto p-4">
+        <div class="bg-white shadow-md p-6">
+            <div class="flex justify-between items-center">
                 <h2 class="text-2xl font-bold text-gray-800">Add New Product</h2>
                 <a href="{{ route('admin.products.index') }}"
                     class="flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
@@ -16,28 +15,6 @@
                     Back to Products
                 </a>
             </div>
-
-            {{-- Flash Message --}}
-            @php
-                $flashType = session('success') ? 'success' : (session('error') ? 'error' : null);
-                $flashMessage = session('success') ?? session('error');
-            @endphp
-
-            @if ($flashType && $flashMessage)
-                <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 3000)" x-show="show" x-transition
-                    class="px-4 py-3 mb-4 transition duration-500
-           {{ $flashType === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200' }}">
-                    <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
-                            fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        {{ $flashMessage }}
-                    </div>
-                </div>
-            @endif
 
             {{-- Validation Errors --}}
             @if ($errors->any())
@@ -60,11 +37,11 @@
             @endif
 
             <form id="productForm" method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data"
-                class="space-y-8 divide-y divide-gray-200">
+                class="space-y-2 divide-y divide-gray-200">
                 @csrf
 
                 <!-- Basic Information Section -->
-                <div class="pt-8">
+                <div class="pt-3">
                     <div class="mb-6">
                         <h3 class="text-xl font-semibold leading-6 text-gray-900">Basic Information</h3>
                         <p class="mt-1 text-sm text-gray-500">Essential details about your product.</p>
@@ -73,9 +50,10 @@
                     <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-12">
                         <!-- Category -->
                         <div class="sm:col-span-2">
-                            <label for="category_id" class="block text-sm font-medium text-gray-700">Category</label>
+                            <label for="category_id" class="block text-sm font-medium text-gray-700">Category <span
+                                    class="text-red-500">*</span></label>
                             <div class="mt-1">
-                                <select id="category_id" name="category_id"
+                                <select id="category_id" name="category_id" required
                                     class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                     <option value="">Select Category</option>
                                     @foreach ($categories as $category)
@@ -178,85 +156,37 @@
                         </div>
 
                         <!-- Product Tags -->
-                        <!-- Product Tags with Alpine.js -->
-                        <div class="sm:col-span-4" x-data="tagSelect()" x-init="init()">
-                            <label class="block text-sm font-medium text-gray-700">Product Tags</label>
-                            <div class="mt-1 relative">
-                                <div @click.away="closeSuggestions()" @keydown.escape="closeSuggestions()"
-                                    class="flex flex-wrap items-center gap-2 p-2 min-h-10 border border-gray-300"
-                                    :class="{ 'border-indigo-500 ring-1 ring-indigo-500': showSuggestions }">
-                                    <!-- Selected Tags -->
-                                    <template x-for="(tag, index) in selectedTags" :key="tag.id">
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-800">
-                                            <span x-text="tag.name"></span>
-                                            <input type="hidden" name="tags[]" :value="tag.id">
-                                            <button type="button" @click="removeTag(index)"
-                                                class="ml-1.5 inline-flex text-indigo-600 hover:text-indigo-900">
-                                                <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd"
-                                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </template>
-
-                                    <!-- Tag Input -->
-                                    <input x-model="searchTerm" @input="filterTags()" @focus="showSuggestions = true"
-                                        type="text" class="flex-1 min-w-0 border-0 focus:ring-0 p-0 text-sm"
-                                        placeholder="Type to filter tags" autocomplete="off">
-                                </div>
-
-                                <!-- Tag Suggestions -->
-                                <div x-show="showSuggestions" x-transition
-                                    class="absolute z-10 mt-1 w-full bg-white border border-gray-300 py-1 overflow-auto max-h-60">
-                                    <template x-for="tag in filteredTags" :key="tag.id">
-                                        <div @click="addTag(tag)"
-                                            class="cursor-default select-none py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white">
-                                            <div class="flex items-center">
-                                                <span class="ml-3 block font-normal truncate" x-text="tag.name"></span>
-                                            </div>
-                                        </div>
-                                    </template>
-                                    <div x-show="filteredTags.length === 0" class="py-2 pl-3 pr-9 text-gray-500">
-                                        No matching tags
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Product Tags -->
                         <div class="sm:col-span-4">
                             <label class="block text-sm font-medium text-gray-700">Product Tags</label>
                             <div class="mt-1 relative">
+                                <!-- Tags container with input -->
                                 <div id="tag-container"
-                                    class="flex flex-wrap items-center gap-2 p-2 min-h-10 border border-gray-300">
+                                    class="flex flex-wrap items-center gap-2 p-2 min-h-8 border border-gray-300 focus-within:ring-1 focus-within:ring-indigo-500 focus-within:border-indigo-500">
                                     <!-- Selected tags will appear here -->
                                     @foreach (old('tags', []) as $selectedTagId)
                                         @php $selectedTag = $tags->firstWhere('id', $selectedTagId); @endphp
                                         @if ($selectedTag)
                                             <span
-                                                class="tag-chip inline-flex items-center px-2.5 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-800">
+                                                class="tag-chip inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
                                                 {{ $selectedTag->name }}
                                                 <input type="hidden" name="tags[]" value="{{ $selectedTag->id }}">
                                                 <button type="button"
-                                                    class="ml-1.5 inline-flex text-indigo-600 hover:text-indigo-900">
-                                                    <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                                        <path fill-rule="evenodd"
-                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                            clip-rule="evenodd" />
-                                                    </svg>
-                                                </button>
+                                                    class="ml-1.5 inline-flex text-indigo-600 hover:text-indigo-900 focus:outline-none">×</button>
                                             </span>
                                         @endif
                                     @endforeach
                                     <input id="tag-input" type="text"
-                                        class="flex-1 min-w-0 border-0 focus:ring-0 p-0 text-sm"
-                                        placeholder="Type to filter tags" autocomplete="off">
+                                        class="flex-1 min-w-[100px] border-0 focus:ring-0 p-0 text-sm"
+                                        placeholder="Type to add tags" autocomplete="off">
                                 </div>
+
+                                <!-- Tags suggestions dropdown -->
                                 <div id="tag-suggestions"
-                                    class="absolute z-10 mt-1 w-full bg-white border border-gray-300 py-1 overflow-auto max-h-60 hidden">
-                                    <!-- All tags will appear here dynamically -->
+                                    class="absolute z-10 mt-1 w-full bg-white shadow-lg border border-gray-300 py-1 overflow-auto max-h-60 hidden">
+                                    @foreach ($tags as $tag)
+                                        <div class="tag-option px-3 py-2 text-sm text-gray-700 hover:bg-indigo-100 cursor-pointer"
+                                            data-value="{{ $tag->id }}">{{ $tag->name }}</div>
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
@@ -275,13 +205,17 @@
                             </div>
                         </div>
 
-                        <!-- Has Variants -->
+                        {{-- Variants status --}}
                         <div class="sm:col-span-12">
                             <div class="flex items-center">
                                 <label for="has_variants" class="mr-2 block text-sm font-medium text-gray-700">This
                                     product has variants</label>
-                                <input type="checkbox" id="has_variants" name="has_variants"
-                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500">
+
+                                <input type="hidden" name="has_variants" value="0">
+
+                                <input type="checkbox" id="has_variants" name="has_variants" value="1"
+                                    class="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    {{ old('has_variants') == '1' ? 'checked' : '' }}>
                             </div>
                         </div>
 
@@ -290,7 +224,7 @@
                             <label for="short_des" class="block text-sm font-medium text-gray-700">Short
                                 Description</label>
                             <div class="mt-1">
-                                <textarea id="short_des" name="short_des" rows="9" maxlength="500"
+                                <textarea id="short_des" name="short_description" rows="9" maxlength="500"
                                     placeholder="Enter a brief description (max 500 characters)"
                                     class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">{{ old('short_des') }}</textarea>
                             </div>
@@ -351,25 +285,46 @@
                     </div>
 
                     <!-- Form Actions -->
-                    <div class="pt-8">
+                    <div class="pt-8" x-data="{ showConfirmation: false, formChanged: false }">
                         <div class="flex justify-end space-x-3">
                             <button type="button" id="cancelBtn"
+                                @click="if(formChanged) { showConfirmation = true } else { window.location.href = '{{ route('admin.products.index') }}' }"
                                 class="border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                 Cancel
                             </button>
-                            <button type="submit" id="submitBtn"
+                            <button type="button" id="submitBtn" @click="showConfirmation = true"
                                 class="inline-flex justify-center border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                 Save Product
                             </button>
+                        </div>
+
+                        <!-- Confirmation Modal -->
+                        <div x-show="showConfirmation" x-cloak x-transition
+                            class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                            <div class="bg-white rounded-lg p-6 max-w-md w-full">
+                                <h3 class="text-lg font-medium text-gray-900 mb-4">Confirm Submission</h3>
+                                <p class="text-sm text-gray-500 mb-6">Are you sure you want to submit this product? These
+                                    changes will be visible to customers immediately.</p>
+                                <div class="flex justify-end space-x-3">
+                                    <button type="button" @click="showConfirmation = false"
+                                        class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        Cancel
+                                    </button>
+                                    <button type="submit"
+                                        class="px-4 py-2 bg-indigo-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        Confirm
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
             </form>
         </div>
     </div>
 
+    {{-- Generate SKU --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Generate SKU
             const generateSKUBtn = document.getElementById('generateSKU');
             if (generateSKUBtn) {
                 generateSKUBtn.addEventListener('click', function() {
@@ -388,155 +343,6 @@
             }
         });
     </script>
-
-    {{-- Product Tags --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const tagContainer = document.getElementById('tag-container');
-            const tagInput = document.getElementById('tag-input');
-            const tagSuggestions = document.getElementById('tag-suggestions');
-            const allTags = {!! json_encode($tags->map(fn($tag) => ['id' => $tag->id, 'name' => $tag->name])) !!};
-            let selectedTagIds = new Set(@json(old('tags', [])));
-
-            // Initialize the component
-            function init() {
-                renderSelectedTags();
-                renderSuggestions('');
-                setupEventListeners();
-            }
-
-            // Set up event listeners
-            function setupEventListeners() {
-                tagInput.addEventListener('input', handleInput);
-                tagInput.addEventListener('focus', showSuggestions);
-                document.addEventListener('click', handleClickOutside);
-                tagInput.addEventListener('keydown', handleKeyDown);
-            }
-
-            // Handle input changes
-            function handleInput(e) {
-                renderSuggestions(e.target.value);
-            }
-
-            // Show suggestions dropdown
-            function showSuggestions() {
-                tagSuggestions.classList.remove('hidden');
-            }
-
-            // Hide suggestions dropdown
-            function hideSuggestions() {
-                tagSuggestions.classList.add('hidden');
-            }
-
-            // Handle clicks outside the component
-            function handleClickOutside(e) {
-                if (!tagContainer.contains(e.target)) {
-                    hideSuggestions();
-                }
-            }
-
-            // Handle keyboard events
-            function handleKeyDown(e) {
-                if (e.key === 'Escape') {
-                    hideSuggestions();
-                }
-            }
-
-            // Render selected tags
-            function renderSelectedTags() {
-                // Clear existing tags (except the input)
-                const existingTags = tagContainer.querySelectorAll('.tag-chip');
-                existingTags.forEach(tag => {
-                    if (!tag.contains(tagInput)) {
-                        tagContainer.removeChild(tag);
-                    }
-                });
-
-                // Add selected tags
-                selectedTagIds.forEach(tagId => {
-                    const tag = allTags.find(t => t.id == tagId);
-                    if (tag) {
-                        addTagToContainer(tag);
-                    }
-                });
-            }
-
-            // Add a tag to the container
-            function addTagToContainer(tag) {
-                const tagElement = document.createElement('span');
-                tagElement.className =
-                    'tag-chip inline-flex items-center px-2.5 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-800';
-                tagElement.innerHTML = `
-            ${tag.name}
-            <input type="hidden" name="tags[]" value="${tag.id}">
-            <button type="button" class="ml-1.5 inline-flex text-indigo-600 hover:text-indigo-900">
-                <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-            </button>
-        `;
-
-                // Add remove event
-                const removeBtn = tagElement.querySelector('button');
-                removeBtn.addEventListener('click', () => removeTag(tag.id));
-
-                // Insert before the input
-                tagContainer.insertBefore(tagElement, tagInput);
-            }
-
-            // Render suggestions
-            function renderSuggestions(searchTerm = '') {
-                const term = searchTerm.toLowerCase();
-                const suggestions = allTags.filter(tag =>
-                    !selectedTagIds.has(tag.id) &&
-                    tag.name.toLowerCase().includes(term)
-                );
-
-                tagSuggestions.innerHTML = '';
-
-                if (suggestions.length === 0) {
-                    const noResults = document.createElement('div');
-                    noResults.className = 'py-2 pl-3 pr-9 text-gray-500';
-                    noResults.textContent = 'No matching tags';
-                    tagSuggestions.appendChild(noResults);
-                } else {
-                    suggestions.forEach(tag => {
-                        const suggestion = document.createElement('div');
-                        suggestion.className =
-                            'cursor-default select-none py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white';
-                        suggestion.innerHTML = `
-                    <div class="flex items-center">
-                        <span class="ml-3 block font-normal truncate">${tag.name}</span>
-                    </div>
-                `;
-                        suggestion.addEventListener('click', () => selectTag(tag));
-                        tagSuggestions.appendChild(suggestion);
-                    });
-                }
-            }
-
-            // Select a tag
-            function selectTag(tag) {
-                selectedTagIds.add(tag.id);
-                renderSelectedTags();
-                tagInput.value = '';
-                renderSuggestions('');
-                tagInput.focus();
-            }
-
-            // Remove a tag
-            function removeTag(tagId) {
-                selectedTagIds.delete(tagId);
-                renderSelectedTags();
-                renderSuggestions(tagInput.value);
-            }
-
-            // Initialize the component
-            init();
-        });
-    </script>
-
-
 
     {{-- Product Image --}}
     <script>
@@ -629,4 +435,168 @@
             });
         });
     </script>
+
+    {{-- Product Tags Script --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tagContainer = document.getElementById('tag-container');
+            const tagInput = document.getElementById('tag-input');
+            const tagSuggestions = document.getElementById('tag-suggestions');
+            const tagOptions = document.querySelectorAll('.tag-option');
+
+            // Track selected tags
+            const selectedTags = new Set();
+            document.querySelectorAll('.tag-chip input[type="hidden"]').forEach(input => {
+                selectedTags.add(input.value);
+            });
+
+            // Utility: update suggestion visibility
+            function updateSuggestions() {
+                tagOptions.forEach(option => {
+                    const tagId = option.getAttribute('data-value');
+                    if (selectedTags.has(tagId)) {
+                        option.classList.add('hidden');
+                    } else {
+                        option.classList.remove('hidden');
+                    }
+                });
+            }
+            updateSuggestions();
+
+            // Create tag chip function
+            function createTagChip(tagId, tagName) {
+                if (selectedTags.has(tagId)) return;
+
+                const tagChip = document.createElement('span');
+                tagChip.className =
+                    'tag-chip inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800';
+                tagChip.innerHTML = `
+                ${tagName}
+                <input type="hidden" name="tags[]" value="${tagId}">
+                <button type="button" class="ml-1.5 inline-flex text-indigo-600 hover:text-indigo-900 focus:outline-none">×</button>
+            `;
+
+                // Insert before input
+                tagContainer.insertBefore(tagChip, tagInput);
+                selectedTags.add(tagId);
+                updateSuggestions();
+
+                // Remove button logic
+                tagChip.querySelector('button').addEventListener('click', function() {
+                    tagChip.remove();
+                    selectedTags.delete(tagId);
+                    updateSuggestions();
+                });
+            }
+
+            // Show suggestions on focus
+            tagInput.addEventListener('focus', () => {
+                tagSuggestions.classList.remove('hidden');
+            });
+
+            // Hide suggestions on outside click
+            document.addEventListener('click', function(e) {
+                if (!tagContainer.contains(e.target) && !tagSuggestions.contains(e.target)) {
+                    tagSuggestions.classList.add('hidden');
+                }
+            });
+
+            // Add tag on suggestion click
+            tagOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const tagId = this.getAttribute('data-value');
+                    const tagName = this.textContent;
+                    createTagChip(tagId, tagName);
+                    tagInput.value = '';
+                    tagSuggestions.classList.add('hidden');
+                });
+            });
+
+            // Add tag on Enter
+            tagInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const value = this.value.trim();
+                    if (!value) return;
+
+                    // Find matching tag
+                    let matchingTag = null;
+                    tagOptions.forEach(option => {
+                        if (option.textContent.toLowerCase() === value.toLowerCase()) {
+                            matchingTag = {
+                                id: option.getAttribute('data-value'),
+                                name: option.textContent
+                            };
+                        }
+                    });
+
+                    const tagId = matchingTag ? matchingTag.id : 'new-' + Date.now();
+                    const tagName = matchingTag ? matchingTag.name : value;
+                    createTagChip(tagId, tagName);
+                    this.value = '';
+                    tagSuggestions.classList.add('hidden');
+                }
+            });
+
+            // Filter suggestions
+            tagInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                tagOptions.forEach(option => {
+                    const text = option.textContent.toLowerCase();
+                    if (text.includes(searchTerm) && !selectedTags.has(option.getAttribute(
+                            'data-value'))) {
+                        option.classList.remove('hidden');
+                    } else {
+                        option.classList.add('hidden');
+                    }
+                });
+            });
+
+            // Initialize remove buttons for old tags
+            document.querySelectorAll('.tag-chip button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const chip = this.closest('.tag-chip');
+                    const tagId = chip.querySelector('input').value;
+                    chip.remove();
+                    selectedTags.delete(tagId);
+                    updateSuggestions();
+                });
+            });
+        });
+    </script>
+
 @endsection
+
+@push('styles')
+    <style>
+        #tag-container {
+            min-height: 40px;
+            transition: all 0.2s;
+        }
+
+        .tag-chip {
+            transition: all 0.2s;
+        }
+
+        .tag-chip:hover {
+            background-color: #e0e7ff !important;
+        }
+
+        #tag-suggestions {
+            scrollbar-width: thin;
+        }
+
+        #tag-input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .tag-option.hidden {
+            display: none;
+        }
+
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+@endpush

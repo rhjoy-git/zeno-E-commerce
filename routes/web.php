@@ -1,118 +1,136 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\TestingController;
+use App\Http\Controllers\{
+    HomeController,
+    ProfileController,
+    TestingController
+};
 
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\OTPVerificationController;
-use App\Http\Controllers\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\{
+    LoginController,
+    RegisterController,
+    OTPVerificationController,
+    PasswordResetLinkController,
+    NewPasswordController
+};
 
-use App\Http\Controllers\Customer\CartController;
-use App\Http\Controllers\Customer\WishlistController;
-use App\Http\Controllers\Customer\CheckoutController;
-use App\Http\Controllers\Customer\CustomerDashboardController;
-use App\Http\Controllers\Customer\ProductController as CustomerProductController;
+use App\Http\Controllers\Customer\{
+    CartController,
+    WishlistController,
+    CheckoutController,
+    CustomerDashboardController,
+    ProductController as CustomerProductController
+};
 
-use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\BrandController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\CustomerController;
-use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Admin\Product\ProductController as AdminProductController;
-use App\Http\Controllers\Admin\ReportController;
-use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\{
+    AdminDashboardController,
+    BrandController,
+    CategoryController,
+    CustomerController,
+    OrderController,
+    ReportController,
+    SettingController
+};
 
-// ==================== Public Routes ====================
+use App\Http\Controllers\Admin\Product\{
+    ProductController as AdminProductController,
+    ProductVariantController
+};
 
-Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/about-us', [HomeController::class, 'aboutUs'])->name('about.us');
-Route::get('/contact-us', [HomeController::class, 'contactUs'])->name('contact.us');
-Route::post('/contact-us', [HomeController::class, 'sendContactMessage'])->name('contact.us.send');
-Route::fallback(function () {
-    abort(404);
+// ==================== PUBLIC ROUTES ====================
+
+Route::controller(HomeController::class)->group(function () {
+    Route::get('/', 'index')->name('home');
+    Route::get('/about-us', 'aboutUs')->name('about.us');
+    Route::match(['get', 'post'], '/contact-us', 'contactUs')->name('contact.us');
 });
+
 // Product Routes
-Route::get('/products', [CustomerProductController::class, 'index'])->name('products.list');
-Route::get('/products/{id}', [CustomerProductController::class, 'show'])->name('products.show');
-
-// Public cart routes 
-Route::prefix('cart')->group(function () {
-    Route::post('/add', [CartController::class, 'addToCart'])->name('cart.add');
-    Route::get('/items', [CartController::class, 'index'])->name('cart.items');
-    Route::post('/update/{id}', [CartController::class, 'update'])->name('cart.update');
-    Route::post('/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+Route::controller(CustomerProductController::class)->group(function () {
+    Route::get('/products', 'index')->name('products.list');
+    Route::get('/products/{product}', 'show')->name('products.show');
 });
 
-// ==================== Guest Routes ====================
+// Cart Routes
+Route::prefix('cart')->controller(CartController::class)->group(function () {
+    Route::post('/add', 'addToCart')->name('cart.add');
+    Route::get('/items', 'index')->name('cart.items');
+    Route::post('/update/{item}', 'update')->name('cart.update');
+    Route::post('/remove/{item}', 'remove')->name('cart.remove');
+});
+
+// ==================== AUTHENTICATION ROUTES ====================
 
 Route::middleware('guest')->group(function () {
     // Registration
-    Route::middleware(['throttle:60,1'])->group(function () {
-        Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register.form');
-        Route::post('/register', [RegisterController::class, 'register'])->name('register');
-    });
+    Route::controller(RegisterController::class)->group(function () {
+        Route::get('/register', 'showRegistrationForm')->name('register.form');
+        Route::post('/register', 'register')->name('register');
+    })->middleware('throttle:60,1');
 
     // Login
-    Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [LoginController::class, 'login'])->middleware(['throttle:5,1']);
+    Route::controller(LoginController::class)->group(function () {
+        Route::get('/login', 'showLoginForm')->name('login');
+        Route::post('/login', 'login');
+    })->middleware('throttle:5,1');
 
-    Route::middleware(['throttle:5,1'])->group(function () {
-        // Forgot Password
-        Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
-        Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
-        // Reset Password
-        Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
-        Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
+    // Password Reset
+    Route::controller(PasswordResetLinkController::class)->group(function () {
+        Route::get('/forgot-password', 'create')->name('password.request');
+        Route::post('/forgot-password', 'store')->name('password.email');
     });
 
+    Route::controller(NewPasswordController::class)->group(function () {
+        Route::get('/reset-password/{token}', 'create')->name('password.reset');
+        Route::post('/reset-password', 'store')->name('password.update');
+    });
 
     // OTP Verification
-    Route::middleware(['throttle:10,1'])->group(function () {
-        Route::get('/otp/verify/{token}', [OTPVerificationController::class, 'showOtpForm'])->name('otp.verify');
-        Route::post('/otp/verify', [OTPVerificationController::class, 'verifyOtp'])->name('otp.verify.post');
+    Route::controller(OTPVerificationController::class)->group(function () {
+        Route::get('/otp/verify/{token}', 'showOtpForm')->name('otp.verify');
+        Route::post('/otp/verify', 'verifyOtp')->name('otp.verify.post');
+        Route::post('/otp/resend/{token}', 'resendOtp')->name('otp.resend');
+        Route::get('/otp/resend/{email}', 'resendOtp')->name('otp.resend.get');
     });
-    Route::middleware(['throttle:5,1'])->group(function () {
-        Route::post('/otp/resend/{token}', [OTPVerificationController::class, 'resendOtp'])->name('otp.resend');
-    });
-    Route::get('/otp/resend/{email}', [OTPVerificationController::class, 'resendOtp'])->name('otp.resend.get');
 });
 
-// ==================== Authenticated Routes ====================
+// ==================== AUTHENTICATED USER ROUTES ====================
 
 Route::middleware('auth')->group(function () {
     // Profile
-    Route::get('/profile', [ProfileController::class, 'showProfile'])->name('profile');
-    Route::put('/profile/info', [ProfileController::class, 'updateProfile'])->name('profile.info.update');
-    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+    Route::controller(ProfileController::class)->group(function () {
+        Route::get('/profile', 'showProfile')->name('profile');
+        Route::put('/profile/info', 'updateProfile')->name('profile.info.update');
+        Route::put('/profile/password', 'updatePassword')->name('profile.password.update');
+    });
 
     // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
 
-// ==================== Customer Routes ====================
+// ==================== CUSTOMER ROUTES ====================
 
-Route::middleware(['auth', 'customer'])->name('customer.')->group(function () {
+Route::middleware(['auth', 'customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::controller(CustomerDashboardController::class)->group(function () {
         Route::get('/dashboard', 'dashboard')->name('dashboard');
         Route::get('/orders', 'orders')->name('orders');
-        Route::get('/orders/{id}', 'orderDetails')->name('order.details');
+        Route::get('/orders/{order}', 'orderDetails')->name('order.details');
         Route::get('/addresses', 'addresses')->name('addresses');
-        Route::get('/addresses/{id}', 'addressDetails')->name('address.details');
+        Route::get('/addresses/{address}', 'addressDetails')->name('address.details');
     });
 
-    // Wish list
+    // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'getWishList'])->name('wishlist');
 
     // Checkout
-    Route::get('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
-    Route::post('/checkout/place-order', [CheckoutController::class, 'placeOrder'])->name('checkout.placeOrder');
+    Route::controller(CheckoutController::class)->group(function () {
+        Route::get('/checkout', 'checkout')->name('checkout');
+        Route::post('/checkout/place-order', 'placeOrder')->name('checkout.placeOrder');
+    });
 });
 
-// ==================== Admin Routes ====================
+// ==================== ADMIN ROUTES ====================
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     // Dashboard
@@ -120,20 +138,32 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Brands
     Route::resource('brands', BrandController::class);
-    Route::get('brands/{brand}/product/create', [AdminProductController::class, 'create'])->name('brands.products.create');
+    Route::get('brands/{brand}/product/create', [AdminProductController::class, 'create'])
+        ->name('brands.products.create');
 
     // Categories
     Route::resource('categories', CategoryController::class);
-    Route::get('categories/{category}/product/create', [AdminProductController::class, 'create'])->name('categories.products.create');
-    Route::post('/admin/categories/{category}/update-status', [CategoryController::class, 'updateStatus']);
+    Route::get('categories/{category}/product/create', [AdminProductController::class, 'create'])
+        ->name('categories.products.create');
+    Route::post('categories/{category}/update-status', [CategoryController::class, 'updateStatus'])
+        ->name('categories.updateStatus');
 
     // Products
     Route::resource('products', AdminProductController::class);
-    // Update product status
-    Route::post('/products/{product}/update-status', [AdminProductController::class, 'updateStatus'])->name('products.updateStatus');
-    // Update product stock
-    Route::post('/products/{product}/update-stock', [AdminProductController::class, 'updateStock'])->name('admin.products.updateStock');
+    Route::post('products/{product}/update-status', [AdminProductController::class, 'updateStatus'])
+        ->name('products.updateStatus');
+    Route::post('products/{product}/update-stock', [AdminProductController::class, 'updateStock'])
+        ->name('products.updateStock');
 
+    // Product Variants
+    Route::prefix('products/{product}/variants')->controller(ProductVariantController::class)->group(function () {
+        Route::get('/', 'index')->name('products.variants.index');
+        Route::get('/create', 'create')->name('products.variants.create');
+        Route::post('/', 'store')->name('products.variants.store');
+        Route::get('/{variant}/edit', 'edit')->name('products.variants.edit');
+        Route::put('/{variant}', 'update')->name('products.variants.update');
+        Route::delete('/{variant}', 'destroy')->name('products.variants.destroy');
+    });
 
     // Customers
     Route::resource('customers', CustomerController::class);
@@ -148,13 +178,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Settings
     Route::resource('settings', SettingController::class);
-
-    // Profile
 });
 
-// ==================== Misc Routes ====================
+// ==================== MISC ROUTES ====================
 
 Route::get('/testing', [TestingController::class, 'index'])->name('testing');
 
-// Optional Frontend Brand Route (Commented Out)
-// Route::get('/brand/{id}', [BrandController::class, 'show'])->name('brand.products');
+Route::fallback(function () {
+    abort(404);
+});

@@ -16,6 +16,7 @@ class Product extends Model
         'price',
         'discount',
         'discount_price',
+        'has_variants',
         'stock_alert',
         'stock_quantity',
         'slug',
@@ -33,6 +34,7 @@ class Product extends Model
         'discount_price' => 'decimal:2',
         'stock_quantity' => 'integer',
         'stock_alert' => 'integer',
+        'has_variants' => 'boolean',
     ];
     public function category()
     {
