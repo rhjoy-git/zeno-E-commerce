@@ -3,7 +3,7 @@
 @section('content')
 <div class="container mx-auto p-4">
     <!-- Filters Section -->
-    <div class="bg-white p-4 mb-4 border border-gray-200">
+    <div class="bg-white p-6 mb-4 border border-gray-200">
         <form method="GET" action="{{ route('admin.products.index') }}">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                 <!-- Search Input -->
@@ -99,7 +99,7 @@
         <!-- Products Table -->
         <div class="bg-white border border-gray-200">
             <!-- Page Header -->
-            <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
                 <div>
                     <h1 class="text-xl font-semibold text-gray-800">Products Management</h1>
                     <p class="text-gray-600 text-sm">Manage all products in your store</p>

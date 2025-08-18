@@ -3,7 +3,7 @@
 @section('content')
     <div class="container mx-auto p-4">
         <div class="bg-white shadow-md p-6">
-            <div class="flex justify-between items-center py-2">
+            <div class="flex justify-between items-center">
                 <h2 class="text-2xl font-bold text-gray-800">Add New Product</h2>
                 <a href="{{ route('admin.products.index') }}"
                     class="flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
