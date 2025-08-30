@@ -1,9 +1,6 @@
 @extends('layouts.app')
-
 @section('title', 'Page Not Found')
-
 @section('content')
-
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center flex flex-col items-center">
     <!-- GIF with text overlay -->
     <div class="relative w-full max-w-3xl">
@@ -13,7 +10,7 @@
             <h1 class="text-4xl md:text-5xl font-bold text-gray-800">Oops! Page Not Found</h1>
         </div>
     </div>
-
+    <p class="py-2 text-red-600 text-lg mb-4">{{ $exception->getMessage() }}</p>
     <!-- Button -->
     <a href="{{ url('/') }}"
         class="bg-black text-white px-10 py-3 text-xl transition-colors tracking-[2px] font-semibold uppercase inline-block">

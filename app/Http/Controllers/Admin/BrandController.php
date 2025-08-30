@@ -27,15 +27,15 @@ class BrandController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'brandName' => 'required|string|max:50',
+            'brand_name' => 'required|string|max:50',
             'brandImg' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $imagePath = $request->file('brandImg')->store('images/brands', 'public');
 
         Brand::create([
-            'brandName' => $request->brandName,
-            'brandImg' => $imagePath,
+            'brand_name' => $request->brand_name,
+            'brand_image' => $imagePath, 
         ]);
 
         return redirect()->back()->with('success', 'Brand created successfully!');
@@ -45,16 +45,19 @@ class BrandController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'brandName' => 'required|string|max:50',
+            'brand_name' => 'required|string|max:50',
             'brandImg' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         $brand = Brand::findOrFail($id);
-        $data = ['brandName' => $request->brandName];
+        $data = ['brand_name' => $request->brand_name];
 
         if ($request->hasFile('brandImg')) {
-            Storage::delete('public/' . $brand->brandImg);
-            $data['brandImg'] = $request->file('brandImg')->store('images/brands', 'public');
+            // Delete old image if exists
+            if ($brand->brand_image) {
+                Storage::delete('public/' . $brand->brand_image);
+            }
+            $data['brand_image'] = $request->file('brandImg')->store('images/brands', 'public');
         }
 
         $brand->update($data);

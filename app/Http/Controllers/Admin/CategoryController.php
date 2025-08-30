@@ -16,7 +16,7 @@ class CategoryController extends Controller
                 $query->where('status', request('status'));
             })
             ->when(request('search'), function ($query) {
-                $query->where('categoryName', 'like', '%' . request('search') . '%');
+                $query->where('category_name', 'like', '%' . request('search') . '%');
             })
             ->latest()
             ->paginate(20);
@@ -45,19 +45,19 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'categoryName' => 'required|string|max:50|unique:categories,categoryName',
+            'category_name' => 'required|string|max:50|unique:categories,category_name',
             'parent_id' => 'nullable|integer|exists:categories,id',
             'status' => 'required|in:active,inactive',
-            'categoryImg' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'category_image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Changed from categoryImg to category_image
         ]);
 
-        $imagePath = $request->file('categoryImg')->store('images/categories', 'public');
+        $imagePath = $request->file('category_image')->store('images/categories', 'public'); // Changed from categoryImg to category_image
 
         Category::create([
-            'categoryName' => $request->categoryName,
+            'category_name' => $request->category_name,
             'parent_id' => $request->parent_id,
             'status' => $request->status ?? 'active',
-            'categoryImg' => $imagePath,
+            'category_image' => $imagePath, // Changed from categoryImg to category_image
         ]);
 
         return redirect()->back()->with('success', 'Category created successfully!');
@@ -68,25 +68,28 @@ class CategoryController extends Controller
     {
         // Validate the request
         $request->validate([
-            'categoryName' => 'required|string|max:50|unique:categories,categoryName,' . $id,
+            'category_name' => 'required|string|max:50|unique:categories,category_name,' . $id,
             'parent_id' => 'nullable|integer|exists:categories,id',
             'status' => 'required|in:active,inactive',
-            'categoryImg' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'category_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Changed from categoryImg to category_image
         ]);
 
-        $Category = Category::findOrFail($id);
+        $category = Category::findOrFail($id);
         $data = [
-            'categoryName' => $request->categoryName,
+            'category_name' => $request->category_name,
             'parent_id' => $request->parent_id,
             'status' => $request->status ?? 'active',
         ];
 
-        if ($request->hasFile('categoryImg')) {
-            Storage::delete('public/' . $Category->categoryImg);
-            $data['categoryImg'] = $request->file('categoryImg')->store('images/categories', 'public');
+        if ($request->hasFile('category_image')) {
+            // Delete old image if exists
+            if ($category->category_image) {
+                Storage::delete('public/' . $category->category_image);
+            }
+            $data['category_image'] = $request->file('category_image')->store('images/categories', 'public'); 
         }
 
-        $Category->update($data);
+        $category->update($data);
         return redirect()->back()->with('success', 'Category updated successfully!');
     }
     // Update Category Status

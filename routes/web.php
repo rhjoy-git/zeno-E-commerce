@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+
+use Illuminate\Support\Facades\Gate;
+
 use App\Http\Controllers\{
     HomeController,
     ProfileController,
@@ -37,6 +40,7 @@ use App\Http\Controllers\Admin\Product\{
     ProductController as AdminProductController,
     ProductVariantController
 };
+use Illuminate\Support\Facades\Auth;
 
 // ==================== PUBLIC ROUTES ====================
 
@@ -148,6 +152,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('categories/{category}/update-status', [CategoryController::class, 'updateStatus'])
         ->name('categories.updateStatus');
 
+    // Check SKU
+    Route::post('products/check-sku', [AdminProductController::class, 'checkSku'])
+        ->name('products.checkSku');
+
     // Products
     Route::resource('products', AdminProductController::class);
     Route::post('products/{product}/update-status', [AdminProductController::class, 'updateStatus'])
@@ -163,6 +171,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/{variant}/edit', 'edit')->name('products.variants.edit');
         Route::put('/{variant}', 'update')->name('products.variants.update');
         Route::delete('/{variant}', 'destroy')->name('products.variants.destroy');
+        // Check SKU
+        Route::post('/check-sku', 'checkSku')->name('products.variants.checkSku');
     });
 
     // Customers
@@ -185,5 +195,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 Route::get('/testing', [TestingController::class, 'index'])->name('testing');
 
 Route::fallback(function () {
+    if (Gate::allows('isAdmin')) {
+        return redirect()->route('admin.dashboard')->with('info', 'The page you were looking for does not exist. You have been redirected to the admin dashboard.');
+    }
     abort(404);
 });
