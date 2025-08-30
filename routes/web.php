@@ -47,6 +47,10 @@ use App\Http\Controllers\Admin\Product\{
 use Illuminate\Support\Facades\Auth;
 
 // ==================== PUBLIC ROUTES ====================
+Route::post('/clear-session-notifications', function () {
+    session()->forget(['status', 'success', 'error', 'warning', 'info']);
+    return response()->json(['success' => true]);
+})->name('clear.session.notifications');
 
 Route::controller(HomeController::class)->group(function () {
     Route::get('/', 'index')->name('home');
@@ -61,11 +65,12 @@ Route::controller(CustomerProductController::class)->group(function () {
 });
 
 // Cart Routes
-Route::prefix('cart')->controller(CartController::class)->group(function () {
-    Route::post('/add', 'addToCart')->name('cart.add');
-    Route::get('/items', 'index')->name('cart.items');
-    Route::post('/update/{item}', 'update')->name('cart.update');
-    Route::post('/remove/{item}', 'remove')->name('cart.remove');
+Route::prefix('cart')->middleware('syncCart')->name('cart.')->controller(CartController::class)->group(function () {
+    Route::post('/add', 'addToCart')->name('add');
+    Route::get('/items', 'index')->name('items');
+    Route::post('/update/{item}', 'update')->name('update');
+    Route::post('/remove/{item}', 'remove')->name('remove');
+    Route::post('/sync', 'syncCart')->name('sync');
 });
 
 // ==================== AUTHENTICATION ROUTES ====================

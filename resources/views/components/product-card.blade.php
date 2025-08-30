@@ -1,4 +1,4 @@
-<div class="group relative bg-white flex flex-col items-center gap-4 w-full md:h-[415px] overflow-hidden "
+<div class="group relative bg-white flex flex-col items-center gap-4 w-full md:h-[415px] overflow-hidden"
     data-categories="{{ implode(' ', $categories) }}">
     <div class="relative overflow-hidden !w-full">
 
@@ -10,9 +10,13 @@
         </span>
         @else
         <span
+            class="absolute top-2 left-2 bg-white text-black px-2 py-1 text-[10px] sm:text-xs font-semibold uppercase rounded-2xl z-10">
+            NEW
+        </span>
+        {{-- <span
             class="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 text-[10px] sm:text-xs font-semibold uppercase rounded-2xl z-10">
             SOLD OUT
-        </span>
+        </span> --}}
         @endif
 
         <!-- Wishlist Button -->
@@ -36,12 +40,11 @@
             <div class="flex items-end justify-center gap-2 p-2 sm:p-3 md:p-4">
                 @if($stock)
                 <button 
-                    {{-- onclick="window.location.href='{{ route('products.show', $id) }}'" --}}
+                    onclick="window.location.href='{{ route('products.show', $id) }}'"
                     class="flex justify-center items-center gap-2 px-6 py-4 tracking-[2px] bg-white text-black text-[16px] font-bold uppercase cursor-pointer">
-                    {{-- onclick="window.location.href='{{ route('products.show', $id) }}'"> --}}
                     Buy
                 </button>
-                <button id="add-to-cart" data-product-id="{{ $id }}" data-price="{{ $price }}"
+                <button id="add-to-cart-{{ $id }}" data-product-id="{{ $id }}" data-price="{{ $price }}"
                     class="add-to-cart flex justify-center items-center gap-2 px-6 py-4 tracking-[2px] bg-white text-black text-[16px] font-bold uppercase">
                     Add Cart
                 </button>

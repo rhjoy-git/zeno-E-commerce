@@ -20,5 +20,10 @@ class ViewComposerServiceProvider extends ServiceProvider
             
             $view->with('navigationMenus', $menus);
         });
+
+        View::composer('*', function ($view) {
+        $cartCount = \App\Http\Controllers\Customer\CartController::getCartCountStatic();
+        $view->with('cartCount', $cartCount);
+    });
     }
 }

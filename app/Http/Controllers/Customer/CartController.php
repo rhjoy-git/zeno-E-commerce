@@ -6,203 +6,302 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\ProductCart;
+use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CartController extends Controller
 {
-    public function index()
-    {
-        if (Auth::check()) {
-            // For authenticated users
-            $cartItems = Auth::user()->cartItems()->with('product')->get();
-        } else {
-            // For guests
-            $cartItems = collect(Session::get('cart', []));
-
-            // If you need full product details for guests, you might need to load them:
-            $productIds = $cartItems->pluck('product_id')->unique();
-            $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
-
-            $cartItems = $cartItems->map(function ($item) use ($products) {
-                $item['product'] = $products[$item['product_id']] ?? null;
-                return $item;
-            });
-        }
-
-        return view('customer.cart-item', compact('cartItems'));
-    }
-
     public function addToCart(Request $request)
     {
         $request->validate([
             'product_id' => 'required|exists:products,id',
-            'color' => 'nullable|string',
-            'size' => 'nullable|string',
             'qty' => 'required|integer|min:1',
+            'color' => 'nullable|string|max:200',
+            'size' => 'nullable|string|max:200',
+            'variant_id' => 'nullable|exists:product_variants,id'
         ]);
+
+        $variantId = $request->variant_id;
+        if ($variantId === '') {
+            $variantId = null;
+        }
 
         $product = Product::findOrFail($request->product_id);
 
-        // Check product availability
-        if ($product->stock_quantity <= 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This product is currently out of stock',
-            ], 400);
+        // Calculate price based on variant or product base price
+        $price = $product->price;
+        if ($request->variant_id) {
+            $variant = ProductVariant::find($request->variant_id);
+            if ($variant) {
+                $price = $variant->price;
+            }
         }
 
-        // Calculate the final price (considering discount if available)
-        $finalPrice = $product->discount ? $product->discount_price : $product->price;
-
-        // Ensure requested quantity doesn't exceed available stock
-        $requestedQty = $request->qty;
-        $adjusted = false;
-        if ($product->stock_quantity < $requestedQty) {
-            $requestedQty = $product->stock_quantity;
-            $adjusted = true; // Indicate that quantity was adjusted
+        // Check if product is on sale
+        if ($product->sale_price && $product->sale_price < $price) {
+            $price = $product->sale_price;
         }
 
+        // For authenticated users
         if (Auth::check()) {
-            // For authenticated users - store in database
-            $cartItem = ProductCart::where([
-                'user_id' => Auth::id(),
-                'product_id' => $request->product_id,
-                'color' => $request->color ?? '',
-                'size' => $request->size ?? ''
-            ])->first();
-
-            if ($cartItem) {
-                // Item already exists - update quantity
-                $newQty = $cartItem->qty + $requestedQty;
-
-                // Check if new quantity exceeds stock
-                if ($product->stock_quantity < $newQty) {
-                    $newQty = $product->stock_quantity;
-                }
-
-                $cartItem->update([
-                    'qty' => $newQty,
-                    'price' => $finalPrice // Update price in case discount changed
-                ]);
-            } else {
-                // Create new cart item
-                $cartItem = ProductCart::create([
-                    'user_id' => Auth::id(),
-                    'product_id' => $request->product_id,
-                    'color' => $request->color ?? '',
-                    'size' => $request->size ?? '',
-                    'qty' => $requestedQty,
-                    'price' => $finalPrice
-                ]);
-            }
-
-            $cartCount = Auth::user()->cartItems()->sum('qty');
-        } else {
-            // For guests - store in session
-            $cart = Session::get('cart', []);
-
-            $key = $this->getCartItemKey($request->product_id, $request->color, $request->size);
-
-            if (isset($cart[$key])) {
-                // Item exists - update quantity
-                $newQty = $cart[$key]['qty'] + $requestedQty;
-
-                // Check stock
-                if ($product->stock_quantity < $newQty) {
-                    $newQty = $product->stock_quantity;
-                }
-
-                $cart[$key]['qty'] = $newQty;
-                $cart[$key]['price'] = $finalPrice; // Update price
-            } else {
-                // Create new cart item
-                $cart[$key] = [
-                    'product_id' => $request->product_id,
-                    'color' => $request->color ?? 'default',
-                    'size' => $request->size ?? 'default',
-                    'qty' => $requestedQty,
-                    'price' => $finalPrice,
-                    'added_at' => now()->toDateTimeString()
-                ];
-            }
-
-            Session::put('cart', $cart);
-            $cartCount = array_sum(array_column($cart, 'qty'));
+            $cartItem = $this->addToDatabaseCart($request, $price);
+            return response()->json([
+                'success' => true,
+                'message' => '"' . $product->name . '" added to cart',
+                'cart_count' => $this->getCartCount()
+            ]);
         }
 
+        // For guests
+        $cartItem = $this->addToSessionCart($request, $product, $price);
         return response()->json([
             'success' => true,
-            'message' => $adjusted ? 'Quantity adjusted to available stock' : 'Product added to cart',
-            'cartCount' => $cartCount,
-            
+            'message' => '"' . $product->name . '" added to cart',
+            'cart_count' => $this->getCartCount()
         ]);
     }
 
-    public function update(Request $request, $id)
+    private function addToDatabaseCart(Request $request, $price)
+    {
+        $userId = Auth::id();
+
+        // Check if item already exists in cart
+        $existingItem = ProductCart::where('user_id', $userId)
+            ->where('product_id', $request->product_id)
+            ->where('variant_id', $request->variant_id)
+            ->where('color', $request->color)
+            ->where('size', $request->size)
+            ->first();
+
+        if ($existingItem) {
+            // Update quantity if item exists
+            $existingItem->qty += $request->qty;
+            $existingItem->save();
+            return $existingItem;
+        }
+
+        // Create new cart item
+        return ProductCart::create([
+            'user_id' => $userId,
+            'product_id' => $request->product_id,
+            'variant_id' => $request->variant_id,
+            'color' => $request->color,
+            'size' => $request->size,
+            'qty' => $request->qty,
+            'price' => $price
+        ]);
+    }
+
+    private function addToSessionCart(Request $request, $product, $price)
+    {
+        $cart = Session::get('cart', []);
+        $uniqueId = $this->generateCartItemId($request);
+
+        // Get product image safely
+        $productImage = null;
+        if ($product->images && $product->images->count() > 0) {
+            $productImage = $product->images->first()->url;
+        }
+
+        if (isset($cart[$uniqueId])) {
+            // Update quantity if item exists
+            $cart[$uniqueId]['qty'] += $request->qty;
+        } else {
+            // Add new item to cart
+            $cart[$uniqueId] = [
+                'product_id' => $request->product_id,
+                'variant_id' => $request->variant_id,
+                'color' => $request->color,
+                'size' => $request->size,
+                'qty' => $request->qty,
+                'price' => $price,
+                'product_name' => $product->name,
+                'product_image' => $productImage,
+                'product_slug' => $product->slug
+            ];
+        }
+
+        Session::put('cart', $cart);
+        return $cart[$uniqueId];
+    }
+
+    private function generateCartItemId(Request $request)
+    {
+        return md5(implode('|', [
+            $request->product_id,
+            $request->variant_id,
+            $request->color,
+            $request->size
+        ]));
+    }
+
+    public function index()
+    {
+        $cartItems = [];
+        $subtotal = 0;
+        $totalItems = 0;
+
+        if (Auth::check()) {
+            $cartItems = ProductCart::with(['product.images', 'product.variants', 'productVariant'])
+                ->where('user_id', Auth::id())
+                ->get();
+
+            foreach ($cartItems as $item) {
+                $itemTotal = $item->price * $item->qty;
+                $subtotal += $itemTotal;
+                $totalItems += $item->qty;
+            }
+        } else {
+            $sessionCart = Session::get('cart', []);
+            foreach ($sessionCart as $id => $item) {
+                $product = Product::with('images')->find($item['product_id']);
+                $itemTotal = $item['price'] * $item['qty'];
+                $subtotal += $itemTotal;
+                $totalItems += $item['qty'];
+
+                $cartItems[] = (object) array_merge([
+                    'id' => $id,
+                    'session_id' => $id,
+                    'product' => $product,
+                    'variant' => $item['variant_id'] ? ProductVariant::find($item['variant_id']) : null,
+                    'color' => $item['color'],
+                    'size' => $item['size'],
+                    'qty' => $item['qty'],
+                    'price' => $item['price'],
+                    'original_price' => $product->price,
+                    'sale_price' => $product->sale_price,
+                    'product_code' => $product->sku ?? 'N/A',
+                    'product_name' => $product->name,
+                    'product_image' => $product->images->first()->url ?? '/images/placeholder.jpg'
+                ], $item);
+            }
+        }
+
+        // Calculate order summary
+        $discount = 0;
+        $vat = $subtotal * 0.05; // 5% VAT
+        $shipping = $subtotal > 50 ? 0 : 9.99; // Free shipping over $50
+        $total = $subtotal - $discount + $vat + $shipping;
+
+        return view('customer.cart-item', compact('cartItems', 'subtotal', 'discount', 'vat', 'shipping', 'total', 'totalItems'));
+    }
+
+    public function update(Request $request, $item)
     {
         $request->validate([
             'qty' => 'required|integer|min:1'
         ]);
 
         if (Auth::check()) {
-            $cartItem = Auth::user()->cartItems()->findOrFail($id);
-            $cartItem->update(['qty' => $request->qty]);
+            $cartItem = ProductCart::where('user_id', Auth::id())->findOrFail($item);
+            $cartItem->qty = $request->qty;
+            $cartItem->save();
         } else {
             $cart = Session::get('cart', []);
-            if (isset($cart[$id])) {
-                $cart[$id]['qty'] = $request->qty;
+            if (isset($cart[$item])) {
+                $cart[$item]['qty'] = $request->qty;
                 Session::put('cart', $cart);
             }
         }
 
-        return redirect()->back()->with('success', 'Cart updated');
+        return response()->json([
+            'success' => true,
+            'message' => 'Cart updated successfully'
+        ]);
     }
 
-    public function remove($id)
+    public function remove($item)
     {
         if (Auth::check()) {
-            Auth::user()->cartItems()->where('id', $id)->delete();
+            $cartItem = ProductCart::where('user_id', Auth::id())->findOrFail($item);
+            $cartItem->delete();
         } else {
             $cart = Session::get('cart', []);
-            if (isset($cart[$id])) {
-                unset($cart[$id]);
+            if (isset($cart[$item])) {
+                unset($cart[$item]);
                 Session::put('cart', $cart);
             }
         }
 
-        return redirect()->back()->with('success', 'Item removed from cart');
+        return response()->json([
+            'success' => true,
+            'message' => 'Item removed from cart',
+            'cart_count' => $this->getCartCount()
+        ]);
     }
 
-    // Helper method to generate unique key for guest cart items
-    protected function getCartItemKey($productId, $color, $size)
+    public function getCartCount()
     {
-        return $productId . '_' . ($color ?? 'default') . '_' . ($size ?? 'default');
-    }
-
-    // Optional: Method to merge guest cart with user cart after login
-    public function mergeGuestCartWithUserCart($user)
-    {
-        if (Session::has('cart')) {
-            $guestCart = Session::get('cart');
-
-            foreach ($guestCart as $item) {
-                ProductCart::updateOrCreate(
-                    [
-                        'user_id' => $user->id,
-                        'product_id' => $item['product_id'],
-                        'color' => $item['color'],
-                        'size' => $item['size']
-                    ],
-                    [
-                        'qty' => $item['qty'],
-                        'price' => $item['price']
-                    ]
-                );
-            }
-
-            Session::forget('cart');
+        if (Auth::check()) {
+            return ProductCart::where('user_id', Auth::id())->sum('qty');
         }
+
+        $cart = Session::get('cart', []);
+        $count = 0;
+        foreach ($cart as $item) {
+            $count += $item['qty'];
+        }
+        return $count;
+    }
+
+    public function syncCart()
+    {
+        if (Auth::check()) {
+            $sessionCart = Session::get('cart', []);
+
+            if (!empty($sessionCart)) {
+                foreach ($sessionCart as $item) {
+                    // Check if item already exists in database
+                    $existingItem = ProductCart::where('user_id', Auth::id())
+                        ->where('product_id', $item['product_id'])
+                        ->where('variant_id', $item['variant_id'])
+                        ->where('color', $item['color'])
+                        ->where('size', $item['size'])
+                        ->first();
+
+                    if ($existingItem) {
+                        // Update quantity
+                        $existingItem->qty += $item['qty'];
+                        $existingItem->save();
+                    } else {
+                        // Create new item
+                        ProductCart::create([
+                            'user_id' => Auth::id(),
+                            'product_id' => $item['product_id'],
+                            'variant_id' => $item['variant_id'],
+                            'color' => $item['color'],
+                            'size' => $item['size'],
+                            'qty' => $item['qty'],
+                            'price' => $item['price']
+                        ]);
+                    }
+                }
+
+                // Clear session cart after syncing
+                Session::forget('cart');
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'cart_count' => $this->getCartCount()
+        ]);
+    }
+
+    public static function getCartCountStatic()
+    {
+        if (Auth::check()) {
+            return ProductCart::where('user_id', Auth::id())->sum('qty');
+        }
+
+        $cart = Session::get('cart', []);
+        $count = 0;
+        foreach ($cart as $item) {
+            $count += $item['qty'];
+        }
+        return $count;
     }
 }

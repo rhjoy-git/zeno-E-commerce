@@ -177,7 +177,7 @@
                     @include('partials.user-dropdown')
 
                     <!-- Cart Icon -->
-                    <button {{-- onclick="window.location.href='{{ route('customer.cart.item') }}'" --}}
+                    <button onclick="window.location.href='{{ route('cart.items') }}'"
                         class="p-2 hover:text-gray-700 relative mr-2 last:mr-0">
                         <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path
@@ -189,7 +189,7 @@
                         </svg>
                         <span
                             class="cart-counter absolute top-1 right-1 bg-red-500 text-white text-[0.65rem] text-center rounded-full h-3 w-3 flex items-center justify-center p-[6px]">{{
-                            $cartTotal ?? 0 }}</span>
+                            $cartCount ?? 0 }}</span>
                     </button>
 
                     <!-- Wishlist Icon -->
@@ -209,7 +209,7 @@
                     </svg>
                 </button>
             </div>
-            
+
         </div>
     </div>
 
