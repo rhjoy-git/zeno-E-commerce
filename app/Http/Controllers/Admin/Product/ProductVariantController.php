@@ -8,11 +8,16 @@ use App\Models\Color;
 use App\Models\ProductSize;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class ProductVariantController extends Controller
 {
     public function index(Product $product)
     {
+        if (!$product->has_variants) {
+            abort(404, 'This product does not have variants enabled.');
+        }
+
         $variants = $product->variants()->with(['color', 'size'])->get();
         $colors = Color::all();
         $sizes = ProductSize::all();
@@ -40,7 +45,7 @@ class ProductVariantController extends Controller
             'status' => 'required|in:active,inactive'
         ]);
 
-        $product->variants()->create($validated + ['created_by' => auth()->id()]);
+        $product->variants()->create($validated + ['created_by' => Auth::id()]);
 
         return redirect()->route('admin.products.variants.index', $product)
             ->with('success', 'Variant created successfully');
@@ -66,7 +71,7 @@ class ProductVariantController extends Controller
             'status' => 'required|in:active,inactive'
         ]);
 
-        $variant->update($validated + ['updated_by' => auth()->id()]);
+        $variant->update($validated + ['updated_by' => Auth::id()]);
 
         return redirect()->route('admin.products.variants.index', $product)
             ->with('success', 'Variant updated successfully');
@@ -78,5 +83,31 @@ class ProductVariantController extends Controller
 
         return redirect()->route('admin.products.variants.index', $product)
             ->with('success', 'Variant deleted successfully');
+    }
+
+    protected function generateSku($title)
+    {
+        $prefix = strtoupper(substr(preg_replace('/[^a-z]/i', '', $title), 0, 3));
+        $random = mt_rand(10000, 99999);
+        return $prefix . '-' . $random;
+    }
+
+    public function checkSku(Request $request, Product $product)
+    {
+        $request->validate([
+            'sku' => 'required|string|max:255',
+        ]);
+
+        $sku = $request->input('sku');
+        $isAvailable = !ProductVariant::where('product_id', $product->id)
+            ->where('sku', $sku)
+            ->exists();
+
+        return response()->json([
+            'isAvailable' => $isAvailable,
+            'productID' => $product->id,
+            'sku' => $sku,
+            'message' => $isAvailable ? 'SKU is available' : 'SKU is already taken'
+        ]);
     }
 }

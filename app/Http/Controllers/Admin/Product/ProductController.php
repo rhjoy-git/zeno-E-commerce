@@ -56,7 +56,7 @@ class ProductController extends Controller
                 'category_id' => $request->category_id,
                 'brand_id' => $request->brand_id,
                 'slug' => Str::slug($request->title) . '-' . uniqid(),
-                'sku' => $request->sku ?? $this->generateSku($request->title),
+                'sku' => $request->sku ?? $this->generateSku('PROD'),
                 'has_variants' => $request->boolean('has_variants'),
             ]);
 
@@ -93,12 +93,13 @@ class ProductController extends Controller
     }
 
     public function show(Product $product)
-    {        
+    {
         return view('admin.products.modals.show', compact('product'));
     }
 
     public function edit(Product $product)
     {
+        // dd($product->images);
         return view('admin.products.modals.edit', [
             'product' => $product,
             'categories' => Category::active()->get(),
@@ -117,8 +118,6 @@ class ProductController extends Controller
                 'title' => $request->title,
                 'short_description' => $request->short_description,
                 'price' => $request->price,
-                // 'discount' => $request->boolean('discount'),
-                // 'discount_price' => $request->discount ? $request->discount_price : null,
                 'stock_quantity' => $request->stock_quantity ?? 0,
                 'stock_alert' => $request->stock_alert,
                 'status' => $request->status,
@@ -147,23 +146,38 @@ class ProductController extends Controller
                 ]);
             }
 
-            // Handle additional images
-            if ($request->hasFile('additional_images')) {
-                foreach ($request->file('additional_images') as $image) {
-                    $path = $image->store('products/images', 'public');
-                    $product->images()->create(['image_path' => $path]);
-                }
+            // Handle additional images - DELETE images that are not in existing_images array
+            $existingImageIds = $request->existing_images ?? [];
+
+            // Get images to delete (images that exist in DB but not in the submitted existing_images array)
+            $imagesToDelete = $product->images()
+                ->where('is_primary', false)
+                ->whereNotIn('id', $existingImageIds)
+                ->get();
+
+            foreach ($imagesToDelete as $image) {
+                Storage::disk('public')->delete($image->image_path);
+                $image->delete();
             }
 
-            // Handle image removals
-            if ($request->filled('remove_images')) {
-                $imagesToDelete = $product->images()
-                    ->whereIn('id', $request->remove_images)
-                    ->get();
+            // Handle new additional images upload
+            if ($request->hasFile('additional_images')) {
+                // Check how many additional images we can still add (max 5 total additional images)
+                $currentAdditionalCount = $product->images()->where('is_primary', false)->count();
+                $remainingSlots = 5 - $currentAdditionalCount;
 
-                foreach ($imagesToDelete as $image) {
-                    Storage::disk('public')->delete($image->image_path);
-                    $image->delete();
+                if ($remainingSlots > 0) {
+                    $images = $request->file('additional_images');
+                    // Only process up to the remaining available slots
+                    $imagesToProcess = array_slice($images, 0, $remainingSlots);
+
+                    foreach ($imagesToProcess as $image) {
+                        $path = $image->store('products/images', 'public');
+                        $product->images()->create([
+                            'image_path' => $path,
+                            'is_primary' => false
+                        ]);
+                    }
                 }
             }
 
@@ -232,7 +246,21 @@ class ProductController extends Controller
     protected function generateSku($title)
     {
         $prefix = strtoupper(substr(preg_replace('/[^a-z]/i', '', $title), 0, 3));
-        $random = mt_rand(1000, 9999);
+        $random = mt_rand(10000, 99999);
         return $prefix . '-' . $random;
+    }
+
+    public function checkSku(Request $request)
+    {
+        $request->validate([
+            'sku' => 'required|string|max:255',
+        ]);
+
+        $sku = $request->input('sku');
+
+        $isAvailable = !Product::where('sku', $sku)->exists();
+        return response()->json([
+            'isAvailable' => $isAvailable
+        ]);
     }
 }

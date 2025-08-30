@@ -26,4 +26,12 @@ export default {
     },
 
     plugins: [forms],
+
+    corePlugins: {
+        ringColor: false,
+        ringWidth: false,
+        ringOpacity: false,
+        outline: false,
+    },
+    
 };

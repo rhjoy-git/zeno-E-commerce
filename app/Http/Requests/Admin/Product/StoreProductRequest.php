@@ -28,6 +28,7 @@ class StoreProductRequest extends FormRequest
             'has_variants' => 'nullable|in:0,1',
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
+            'sku' => 'required|string|max:255|unique:products,sku',
             'primary_image' => 'required|image|max:2048',
             'additional_images' => 'nullable|array',
             'additional_images.*' => 'image|max:2048',
@@ -79,6 +80,12 @@ class StoreProductRequest extends FormRequest
             // Tags
             'tags.array' => 'The tags must be a list of tags.',
             'tags.*.exists' => 'One or more selected tags do not exist.',
+
+            // SKU
+            'sku.required' => 'The product SKU is required.',
+            'sku.string' => 'The product SKU must be a string.',
+            'sku.max' => 'The product SKU cannot be more than :max characters.',
+            'sku.unique' => 'The product SKU must be unique.',
 
             // Images
             'primary_image.required' => 'A primary image is required.',

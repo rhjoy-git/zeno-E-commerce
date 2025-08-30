@@ -16,7 +16,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="">    
+<body class="">
+    @include('partials.flash-messages')
     @yield('content')
     @stack('scripts')
 </body>
