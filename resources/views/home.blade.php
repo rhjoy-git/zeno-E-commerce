@@ -30,7 +30,8 @@
 <body class="bg-white text-black font-sans antialiased">
     <!-- Preloader -->
     @include('partials.preloader')
-    @include('frontend.navbar')
+    @include('components.dynamic-navigation')
+    {{-- @include('frontend.navbar') --}}
     @include('partials.flash-messages')
     @include('frontend.heroSection')
     @include('frontend.new-arrivals')

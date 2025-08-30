@@ -26,6 +26,10 @@ use App\Http\Controllers\Customer\{
     ProductController as CustomerProductController
 };
 
+use App\Http\Controllers\View\{
+    NavigationController
+};
+
 use App\Http\Controllers\Admin\{
     AdminDashboardController,
     BrandController,
@@ -188,6 +192,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Settings
     Route::resource('settings', SettingController::class);
+
+    // Navigation admin routes
+    Route::resource('navigation', 'Admin\NavigationController')->except(['show']);
+    Route::prefix('navigation/{menu}')->group(function () {
+        Route::post('items', 'Admin\NavigationController@storeItem')->name('navigation.items.store');
+        Route::put('items/{item}', 'Admin\NavigationController@updateItem')->name('navigation.items.update');
+        Route::delete('items/{item}', 'Admin\NavigationController@destroyItem')->name('navigation.items.destroy');
+
+        Route::post('mega-content', 'Admin\NavigationController@storeMegaContent')->name('navigation.mega-content.store');
+        Route::put('mega-content/{content}', 'Admin\NavigationController@updateMegaContent')->name('navigation.mega-content.update');
+        Route::delete('mega-content/{content}', 'Admin\NavigationController@destroyMegaContent')->name('navigation.mega-content.destroy');
+    });
 });
 
 // ==================== MISC ROUTES ====================

@@ -39,6 +39,7 @@ class DatabaseSeeder extends Seeder
             ProductReviewSeeder::class,
             PolicySeeder::class,
             OrderSeeder::class,
+            NavigationMenuSeeder::class,
         ]);
     }
 }
