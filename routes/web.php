@@ -26,6 +26,10 @@ use App\Http\Controllers\Customer\{
     ProductController as CustomerProductController
 };
 
+use App\Http\Controllers\View\{
+    NavigationController
+};
+
 use App\Http\Controllers\Admin\{
     AdminDashboardController,
     BrandController,
@@ -43,6 +47,10 @@ use App\Http\Controllers\Admin\Product\{
 use Illuminate\Support\Facades\Auth;
 
 // ==================== PUBLIC ROUTES ====================
+Route::post('/clear-session-notifications', function () {
+    session()->forget(['status', 'success', 'error', 'warning', 'info']);
+    return response()->json(['success' => true]);
+})->name('clear.session.notifications');
 
 Route::controller(HomeController::class)->group(function () {
     Route::get('/', 'index')->name('home');
@@ -57,11 +65,12 @@ Route::controller(CustomerProductController::class)->group(function () {
 });
 
 // Cart Routes
-Route::prefix('cart')->controller(CartController::class)->group(function () {
-    Route::post('/add', 'addToCart')->name('cart.add');
-    Route::get('/items', 'index')->name('cart.items');
-    Route::post('/update/{item}', 'update')->name('cart.update');
-    Route::post('/remove/{item}', 'remove')->name('cart.remove');
+Route::prefix('cart')->middleware('syncCart')->name('cart.')->controller(CartController::class)->group(function () {
+    Route::post('/add', 'addToCart')->name('add');
+    Route::get('/items', 'index')->name('items');
+    Route::post('/update/{item}', 'update')->name('update');
+    Route::post('/remove/{item}', 'remove')->name('remove');
+    Route::post('/sync', 'syncCart')->name('sync');
 });
 
 // ==================== AUTHENTICATION ROUTES ====================
@@ -188,6 +197,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Settings
     Route::resource('settings', SettingController::class);
+
+    // Navigation admin routes
+    Route::resource('navigation', 'Admin\NavigationController')->except(['show']);
+    Route::prefix('navigation/{menu}')->group(function () {
+        Route::post('items', 'Admin\NavigationController@storeItem')->name('navigation.items.store');
+        Route::put('items/{item}', 'Admin\NavigationController@updateItem')->name('navigation.items.update');
+        Route::delete('items/{item}', 'Admin\NavigationController@destroyItem')->name('navigation.items.destroy');
+
+        Route::post('mega-content', 'Admin\NavigationController@storeMegaContent')->name('navigation.mega-content.store');
+        Route::put('mega-content/{content}', 'Admin\NavigationController@updateMegaContent')->name('navigation.mega-content.update');
+        Route::delete('mega-content/{content}', 'Admin\NavigationController@destroyMegaContent')->name('navigation.mega-content.destroy');
+    });
 });
 
 // ==================== MISC ROUTES ====================

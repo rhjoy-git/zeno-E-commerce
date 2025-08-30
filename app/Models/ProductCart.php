@@ -17,8 +17,8 @@ class ProductCart extends Model
         'size',
         'qty',
         'price',
-        'created_by',
-        'updated_by',
+        // 'created_by',
+        // 'updated_by',
     ];
     protected $casts = [
         'qty' => 'integer',
@@ -36,14 +36,14 @@ class ProductCart extends Model
     {
         return $this->belongsTo(ProductVariant::class, 'variant_id');
     }
-    protected static function booted()
-    {
-        static::creating(function ($cart) {
-            $cart->created_by = Auth::id() ?? null;
-            $cart->updated_by = Auth::id() ?? null;
-        });
-        static::updating(function ($cart) {
-            $cart->updated_by = Auth::id() ?? null;
-        });
-    }
+    // protected static function booted()
+    // {
+    //     static::creating(function ($cart) {
+    //         $cart->created_by = Auth::id() ?? null;
+    //         $cart->updated_by = Auth::id() ?? null;
+    //     });
+    //     static::updating(function ($cart) {
+    //         $cart->updated_by = Auth::id() ?? null;
+    //     });
+    // }
 }
