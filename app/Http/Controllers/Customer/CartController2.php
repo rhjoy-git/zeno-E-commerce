@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class CartController extends Controller
+class CartController2 extends Controller
 {
     public function addToCart(Request $request)
     {
@@ -141,19 +141,25 @@ class CartController extends Controller
     public function index()
     {
         $cartItems = [];
+        $subtotal = 0;
         $totalItems = 0;
 
         if (Auth::check()) {
-            DB::enableQueryLog();
             $cartItems = ProductCart::with(['product.images', 'product.variants', 'productVariant'])
                 ->where('user_id', Auth::id())
                 ->get();
-            dd(DB::getQueryLog());
-            $totalItems = $cartItems->sum('qty');
+
+            foreach ($cartItems as $item) {
+                $itemTotal = $item->price * $item->qty;
+                $subtotal += $itemTotal;
+                $totalItems += $item->qty;
+            }
         } else {
             $sessionCart = Session::get('cart', []);
             foreach ($sessionCart as $id => $item) {
                 $product = Product::with('images')->find($item['product_id']);
+                $itemTotal = $item['price'] * $item['qty'];
+                $subtotal += $itemTotal;
                 $totalItems += $item['qty'];
 
                 $cartItems[] = (object) array_merge([
@@ -173,7 +179,13 @@ class CartController extends Controller
                 ], $item);
             }
         }
-        dd($cartItems, $totalItems);
+
+        // Calculate order summary
+        $discount = 0;
+        $vat = $subtotal * 0.05; // 5% VAT
+        $shipping = $subtotal > 50 ? 0 : 9.99; // Free shipping over $50
+        $total = $subtotal - $discount + $vat + $shipping;
+
         return view('customer.cart-item', compact('cartItems', 'subtotal', 'discount', 'vat', 'shipping', 'total', 'totalItems'));
     }
 
