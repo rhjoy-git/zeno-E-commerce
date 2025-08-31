@@ -182,6 +182,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/{variant}', 'destroy')->name('products.variants.destroy');
         // Check SKU
         Route::post('/check-sku', 'checkSku')->name('products.variants.checkSku');
+        // Check Variants Combination
+        Route::post('/check-combination', [ProductVariantController::class, 'checkCombination'])
+            ->name('products.variants.checkCombination');
+
+        Route::post('/{variant}/check-combination-edit', [ProductVariantController::class, 'checkCombinationEdit'])
+            ->name('products.variants.checkCombinationEdit');
+
+        Route::post('/{variant}/check-sku-edit', [ProductVariantController::class, 'checkSkuEdit'])
+            ->name('products.variants.checkSkuEdit');
     });
 
     // Customers

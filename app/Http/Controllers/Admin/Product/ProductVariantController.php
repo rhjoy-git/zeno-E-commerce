@@ -8,6 +8,7 @@ use App\Models\Color;
 use App\Models\ProductSize;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Product\StoreProductVariantsRequest;
 use Illuminate\Support\Facades\Auth;
 
 class ProductVariantController extends Controller
@@ -33,22 +34,41 @@ class ProductVariantController extends Controller
         return view('admin.products.variants.create', compact('product', 'colors', 'sizes'));
     }
 
-    public function store(Request $request, Product $product)
+    public function store(StoreProductVariantsRequest $request, Product $product)
     {
-        $validated = $request->validate([
-            'color_id' => 'nullable|exists:colors,id',
-            'size_id' => 'nullable|exists:product_sizes,id',
-            'price' => 'required|numeric|min:0',
-            'stock_quantity' => 'required|integer|min:0',
-            'stock_alert' => 'nullable|integer|min:0',
-            'sku' => 'nullable|string|unique:product_variants,sku',
-            'status' => 'required|in:active,inactive'
-        ]);
+        $validated = $request->validated();
+        $createdCount = 0;
+        $errors = [];
 
-        $product->variants()->create($validated + ['created_by' => Auth::id()]);
+        foreach ($validated['variants'] as $index => $variantData) {
+            // Check if combination already exists
+            $exists = $product->variants()
+                ->where('color_id', $variantData['color_id'])
+                ->where('size_id', $variantData['size_id'])
+                ->exists();
+
+            if ($exists) {
+                $errors[] = "Variant #" . ($index + 1) . ": A variant with the same color and size already exists.";
+                continue;
+            }
+
+            try {
+                $product->variants()->create($variantData + ['created_by' => Auth::id()]);
+                $createdCount++;
+            } catch (\Exception $e) {
+                $errors[] = "Variant #" . ($index + 1) . ": " . $e->getMessage();
+            }
+        }
+
+        if (!empty($errors)) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['variants' => $errors]);
+        }
 
         return redirect()->route('admin.products.variants.index', $product)
-            ->with('success', 'Variant created successfully');
+            ->with('success', $createdCount . ' variant(s) created successfully.');
     }
 
     public function edit(Product $product, ProductVariant $variant)
@@ -62,14 +82,25 @@ class ProductVariantController extends Controller
     public function update(Request $request, Product $product, ProductVariant $variant)
     {
         $validated = $request->validate([
-            'color_id' => 'nullable|exists:colors,id',
-            'size_id' => 'nullable|exists:product_sizes,id',
+            'color_id' => 'required|exists:colors,id',
+            'size_id' => 'required|exists:product_sizes,id',
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'stock_alert' => 'nullable|integer|min:0',
-            'sku' => 'nullable|string|unique:product_variants,sku,' . $variant->id,
+            'sku' => 'required|string|unique:product_variants,sku,' . $variant->id,
             'status' => 'required|in:active,inactive'
         ]);
+
+        // Check if combination already exists (excluding current variant)
+        $exists = $product->variants()
+            ->where('color_id', $validated['color_id'])
+            ->where('size_id', $validated['size_id'])
+            ->where('id', '!=', $variant->id)
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors(['variant' => 'A variant with the same color and size already exists.'])->withInput();
+        }
 
         $variant->update($validated + ['updated_by' => Auth::id()]);
 
@@ -108,6 +139,54 @@ class ProductVariantController extends Controller
             'productID' => $product->id,
             'sku' => $sku,
             'message' => $isAvailable ? 'SKU is available' : 'SKU is already taken'
+        ]);
+    }
+
+
+    public function checkCombination(Request $request, Product $product)
+    {
+        $request->validate([
+            'color_id' => 'required|exists:colors,id',
+            'size_id' => 'required|exists:product_sizes,id',
+        ]);
+
+        $exists = $product->variants()
+            ->where('color_id', $request->color_id)
+            ->where('size_id', $request->size_id)
+            ->exists();
+
+        return response()->json(['exists' => $exists]);
+    }
+
+    public function checkCombinationEdit(Request $request, Product $product, ProductVariant $variant)
+    {
+        $request->validate([
+            'color_id' => 'required|exists:colors,id',
+            'size_id' => 'required|exists:product_sizes,id',
+        ]);
+
+        $exists = $product->variants()
+            ->where('color_id', $request->color_id)
+            ->where('size_id', $request->size_id)
+            ->where('id', '!=', $variant->id)
+            ->exists();
+
+        return response()->json(['exists' => $exists]);
+    }
+
+    public function checkSkuEdit(Request $request, Product $product, ProductVariant $variant)
+    {
+        $request->validate([
+            'sku' => 'required|string',
+        ]);
+
+        $exists = ProductVariant::where('sku', $request->sku)
+            ->where('id', '!=', $variant->id)
+            ->exists();
+
+        return response()->json([
+            'isAvailable' => !$exists,
+            'message' => $exists ? 'This SKU is already in use by another variant.' : 'SKU is available.'
         ]);
     }
 }
