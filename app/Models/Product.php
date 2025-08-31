@@ -60,6 +60,11 @@ class Product extends Model
     {
         return $this->hasMany(ProductImage::class);
     }
+    public function primaryImage()
+    {
+        return $this->hasOne(ProductImage::class)
+            ->where('is_primary', true);
+    }
     public function wishes()
     {
         return $this->hasMany(ProductWish::class);
@@ -75,6 +80,11 @@ class Product extends Model
     public function variants()
     {
         return $this->hasMany(ProductVariant::class);
+    }
+    public function activeVariants()
+    {
+        return $this->hasMany(ProductVariant::class)
+            ->where('status', 'active');
     }
     public function orderItems()
     {
@@ -95,6 +105,35 @@ class Product extends Model
     public function scopeInStock($query)
     {
         return $query->where('stock_quantity', '>', 0);
+    }
+    public function availableSizes()
+    {
+        return $this->hasManyThrough(
+            ProductSize::class,
+            ProductVariant::class,
+            'product_id',
+            'id',
+            'id',
+            'size_id'
+        )
+            ->where('product_variants.status', 'active')
+            ->select('product_sizes.*')
+            ->distinct();
+    }
+
+    public function availableColors()
+    {
+        return $this->hasManyThrough(
+            Color::class,
+            ProductVariant::class,
+            'product_id',
+            'id',
+            'id',
+            'color_id'
+        )
+            ->where('product_variants.status', 'active')
+            ->select('colors.*')
+            ->distinct();
     }
     protected static function booted()
     {

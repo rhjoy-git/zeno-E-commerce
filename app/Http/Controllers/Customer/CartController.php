@@ -144,11 +144,20 @@ class CartController extends Controller
         $totalItems = 0;
 
         if (Auth::check()) {
-            DB::enableQueryLog();
-            $cartItems = ProductCart::with(['product.images', 'product.variants', 'productVariant'])
+            // DB::enableQueryLog();
+            $cartItems = ProductCart::with([
+                'product.primaryImage',
+                'product.activeVariants.size',
+                'product.activeVariants.color',
+                'product.availableSizes',
+                'product.availableColors',
+                'productVariant',
+                'productVariant.color',
+                'productVariant.size'
+            ])
                 ->where('user_id', Auth::id())
                 ->get();
-            dd(DB::getQueryLog());
+            // dd(DB::getQueryLog());
             $totalItems = $cartItems->sum('qty');
         } else {
             $sessionCart = Session::get('cart', []);
@@ -173,8 +182,8 @@ class CartController extends Controller
                 ], $item);
             }
         }
-        dd($cartItems, $totalItems);
-        return view('customer.cart-item', compact('cartItems', 'subtotal', 'discount', 'vat', 'shipping', 'total', 'totalItems'));
+        // dd($cartItems, $cartItems[0]->product);
+        return view('customer.cart-item', compact('cartItems', 'totalItems'));
     }
 
     public function update(Request $request, $item)
@@ -291,5 +300,23 @@ class CartController extends Controller
             $count += $item['qty'];
         }
         return $count;
+    }
+
+    private function calculateItemTotal($item)
+    {
+        $price = $item->price;
+        $quantity = $item->qty;
+
+        // Use discount price if available
+        if ($item->product->discount && $item->product->discount_price) {
+            $price = $item->product->discount_price;
+        }
+
+        return [
+            'item_total' => $price * $quantity,
+            'item_price' => $price,
+            'original_total' => $item->product->price * $quantity,
+            'discount' => ($item->product->price * $quantity) - ($price * $quantity)
+        ];
     }
 }
