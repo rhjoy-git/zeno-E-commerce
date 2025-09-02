@@ -123,7 +123,7 @@
             <div>
                 <h3 class="font-bold uppercase text-base text-black mb-4 tracking-wider">CONTACT US</h3>
                 <ul class="space-y-2">
-                    <li class="text-gray-600">+880 1234-567890</li>
+                    <li class="text-gray-600">+880 17145-32308</li>
                     <li class="text-gray-600">support@zeno.com</li>
                     <li class="text-gray-600">Sun – Thu (10AM–5PM)</li>
                     <li class="text-gray-600">D Block, Road 10, Banani</li>
