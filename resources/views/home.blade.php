@@ -31,8 +31,8 @@
     <!-- Preloader -->
     @include('partials.preloader')
     @include('components.notification')
-    @include('components.dynamic-navigation')
-    {{-- @include('frontend.navbar') --}}
+    {{-- @include('components.dynamic-navigation') --}}
+    @include('frontend.navbar')
     @include('partials.flash-messages')
     @include('frontend.heroSection')
     @include('frontend.new-arrivals')

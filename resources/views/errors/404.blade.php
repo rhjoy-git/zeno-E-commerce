@@ -7,7 +7,7 @@
         <img src="https://cdn.dribbble.com/userupload/20420676/file/original-aac8f7f838812fa53cd92617fad5f892.gif"
             alt="Confused animation" class="mx-auto rounded-lg w-[500px] h-auto opacity-90" />
         <div class="absolute inset-0 flex items-start justify-center">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800">Oops! Page Not Found</h1>
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800">Sorry! I am under Construction.</h1>
         </div>
     </div>
     <p class="py-2 text-red-600 text-lg mb-4">{{ $exception->getMessage() }}</p>
