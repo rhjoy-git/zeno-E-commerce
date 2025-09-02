@@ -57,6 +57,10 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/about-us', 'aboutUs')->name('about.us');
     Route::match(['get', 'post'], '/contact-us', 'contactUs')->name('contact.us');
 });
+// Delivery & Return Policy
+Route::get('/delivery-return-policy', function () {
+    return view('frontend.delivery-return-policy');
+})->name('delivery.return.policy');
 
 // Product Routes
 Route::controller(CustomerProductController::class)->group(function () {

@@ -223,7 +223,7 @@
                 </a>
                 <!-- Delivery & Return Policy -->
                 <div class="text-center text-sm">
-                    <a href="#" class="underline">Delivery & Return Policy</a>
+                    <a href="{{ route('delivery.return.policy') }}" class="underline">Delivery & Return Policy</a>
                 </div>
             </div>
         </div>
