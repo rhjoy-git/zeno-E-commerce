@@ -4,7 +4,7 @@
 
 > A full-stack e-commerce solution built with Laravel, designed for scalability and developer experience
 
-[![License](https://github.com/rhjoy-git/zeno-E-commerce/blob/main/LICENSE)](LICENSE)
+[![License](https://img.shields.io/badge/License-Proprietary-blue.svg)](#-license)
 ![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?logo=tailwind-css&logoColor=white)
