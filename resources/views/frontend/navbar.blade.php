@@ -198,7 +198,8 @@
                     @include('partials.user-dropdown')
 
                     <!-- Cart Icon -->
-                    <button {{-- onclick="window.location.href='{{ route('customer.cart.item') }}'" --}} class="p-2 hover:text-gray-700 relative mr-2 last:mr-0">
+                    <button onclick="window.location.href='{{ route('cart.items') }}'"
+                        class="p-2 hover:text-gray-700 relative mr-2 last:mr-0">
                         <svg width="28" height="28" viewBox="0 0 28 28" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
                             <path
@@ -210,7 +211,7 @@
                                 fill="white" />
                         </svg>
                         <span
-                            class="cart-counter absolute top-1 right-1 bg-red-500 text-white text-[0.65rem] text-center rounded-full h-3 w-3 flex items-center justify-center p-[6px]">{{ $cartTotal ?? 0 }}</span>
+                            class="cart-counter absolute top-1 right-1 bg-red-500 text-white text-[0.65rem] text-center rounded-full h-3 w-3 flex items-center justify-center p-[6px]">{{ $cartCount ?? 0 }}</span>
                     </button>
 
                     <!-- Wishlist Icon -->
@@ -223,27 +224,20 @@
                         </svg>
                     </button>
                 </div>
-                <!-- Mobile Menu Button -->
-                <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="md:hidden p-2 hover:text-gray-700">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
+
             </div>
-
         </div>
-    </div>
 
-    <!-- Mobile Menu -->
-    <div class="md:hidden" x-show="isMobileMenuOpen" @click.away="isMobileMenuOpen = false" x-cloak>
-        <div class="px-2 pt-2 pb-3 space-y-1">
-            <a href="#" class="block px-3 py-2 hover:text-gray-700 hover:bg-gray-100 uppercase">Men</a>
-            <a href="#" class="block px-3 py-2 hover:text-gray-700 hover:bg-gray-100 uppercase">Women</a>
-            <a href="#" class="block px-3 py-2 hover:text-gray-700 hover:bg-gray-100 uppercase">Kid</a>
-            <a href="#" class="block px-3 py-2 hover:text-gray-700 hover:bg-gray-100 uppercase">Accessories</a>
-            <a href="#"
-                class="block px-3 py-2 text-red-600 hover:text-gray-700 hover:bg-gray-100 uppercase">Sale</a>
+        <!-- Mobile Menu -->
+        <div class="md:hidden" x-show="isMobileMenuOpen" @click.away="isMobileMenuOpen = false" x-cloak>
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="#" class="block px-3 py-2 hover:text-gray-700 hover:bg-gray-100 uppercase">Men</a>
+                <a href="#" class="block px-3 py-2 hover:text-gray-700 hover:bg-gray-100 uppercase">Women</a>
+                <a href="#" class="block px-3 py-2 hover:text-gray-700 hover:bg-gray-100 uppercase">Kid</a>
+                <a href="#"
+                    class="block px-3 py-2 hover:text-gray-700 hover:bg-gray-100 uppercase">Accessories</a>
+                <a href="#"
+                    class="block px-3 py-2 text-red-600 hover:text-gray-700 hover:bg-gray-100 uppercase">Sale</a>
+            </div>
         </div>
-    </div>
 </nav>
