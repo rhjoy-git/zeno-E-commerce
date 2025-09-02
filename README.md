@@ -1,66 +1,141 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+<div align="center">
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# 🛒 Zeno – Modern E-commerce Platform
 
-## About Laravel
+> A full-stack e-commerce solution built with Laravel, designed for scalability and developer experience
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+[![License](https://github.com/rhjoy-git/zeno-E-commerce/blob/main/LICENSE)](LICENSE)
+![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?logo=tailwind-css&logoColor=white)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+</div>
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 📋 Table of Contents
+- [Overview](#-overview)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Status](#-project-status)
+- [UI/UX Design](#-uiux-design)
+- [Installation](#-installation)
+- [License](#-license)
+- [Connect](#-connect)
+- [Credits](#-credits)
 
-## Learning Laravel
+## 🚀 Overview
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Zeno is a comprehensive e-commerce platform built with Laravel that provides a scalable, dynamic foundation for modern online stores. The platform is designed with both merchants and developers in mind, offering a robust feature set while maintaining code quality and extensibility.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+> **Note**: Backend development is currently in progress with regular updates.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## ✨ Features
 
-## Laravel Sponsors
+### 🔐 Authentication & Security
+- Laravel Breeze/Sanctum authentication
+- Role-based access control
+- Secure session management
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 📦 Product Management
+- Category and brand organization
+- Product variants and attributes
+- Review and rating system
+- Tag-based categorization
 
-### Premium Partners
+### 🛒 Shopping Experience
+- Dynamic shopping cart
+- Streamlined checkout process
+- Wishlist functionality
+- Order history and tracking
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 💳 Payments & Transactions
+- Multiple payment gateway integration (Bkash, Nagad, and more)
+- Commission management system
+- Invoice generation
+- Refund processing
 
-## Contributing
+### 📊 Analytics & Reporting
+- Sales dashboard
+- Customer insights
+- Inventory management
+- Performance metrics
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🏗️ Tech Stack
 
-## Code of Conduct
+| Layer | Technology |
+|-------|------------|
+| **Backend** | Laravel 12 (PHP) |
+| **Frontend** | Blade Templates (React planned) |
+| **Database** | MySQL |
+| **Styling** | Tailwind CSS |
+| **Real-time** | Livewire (Dashboard components) |
+| **Authentication** | Laravel Sanctum |
+| **Deployment** | Docker (planned) |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 📈 Project Status
 
-## Security Vulnerabilities
+### Current Development Focus
+- 🔨 **Backend Architecture** - In progress
+- 🎨 **Admin Dashboard** - In design phase
+- 📱 **Responsive Layouts** - In development
+- 💳 **Payment Integration** - Planning stage
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Release Timeline
+- **Alpha Release**: Q3 2024
+- **Beta Release**: Q4 2024
+- **Version 1.0**: Q1 2025
 
-## License
+## 🎨 UI/UX Design
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The user interface has been meticulously designed by **Rahul Ornob** to ensure an exceptional user experience across all devices.
+
+<div align="center">
+  
+![UI Preview](https://www.figma.com/design/aVdf3Ch6Ag3zwowuOnsNss/Zeno---E-Commerce)
+*Example of the clean, modern interface design*
+
+</div>
+
+For more design previews, check out [Rahul's portfolio](https://dribbble.com/rahulornob).
+
+## 📜 License
+
+Copyright (c) 2025 Rakibul Hasan Joy
+
+All Rights Reserved.
+
+This repository and its contents are the proprietary property of the author.  
+
+Permission is NOT granted to any individual, company, or organization to copy, modify, merge, publish, distribute, sublicense, or sell copies of this software, in source code or binary form.  
+
+Usage of this project in any form, whole or part, without explicit written permission from the author is strictly prohibited.  
+
+For inquiries regarding licensing or permissions, please contact: rakibulhasanjoy009@gmail.com
+
+## 📬 Connect
+
+<div align="center">
+
+### Rakibul Hasan Joy
+**Full Stack Developer**
+
+[![GitHub](https://img.shields.io/badge/GitHub-rhjoy--git-181717?logo=github)](https://github.com/rhjoy-git/zeno-E-commerce)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-dev--rhjoy-0A66C2?logo=linkedin)](https://www.linkedin.com/in/dev-rhjoy/)
+[![Email](https://img.shields.io/badge/Email-rakibulhasanjoy009@gmail.com-D14836?logo=gmail&logoColor=white)](mailto:rakibulhasanjoy009@gmail.com)
+
+</div>
+
+## 🙌 Credits
+
+- **UI/UX Design**: [Rahul Ornob](https://dribbble.com/rahulornob)
+- **Development**: Rakibul Hasan Joy
+- **Project Management**: Team [End Brackets](https://endbrackets.com/) 
+
+---
+
+<div align="center">
+
+### 🌟 Star this repo if you find it interesting!
+
+*Stay tuned for more updates as we continue building Zeno!*
+
+</div>
