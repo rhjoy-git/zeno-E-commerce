@@ -4,5 +4,4 @@
         <x-product-card :id="$product['id']" :image="$product['image']" :title="$product['title']" :price="$product['price']" :badge="$product['badge']"
             :stock="$product['stock']" :categories="$product['categories']" />
     @endforeach
-
 </div>

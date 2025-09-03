@@ -17,28 +17,7 @@ class HomeController extends Controller
             'id' => Auth::user()->id,
             'name' => Auth::user()->name,
             'email' => Auth::user()->email,
-        ] : null;
-
-        // Get cart data for authenticated user
-        $cartItems = [];
-        $cartTotal = 0;
-
-        if (Auth::check()) {
-            $cartItems = ProductCart::where('user_id', Auth::id())
-                ->with('product')
-                ->get()
-                ->map(function ($item) {
-                    return [
-                        'product_id' => $item->product_id,
-                        'product_name' => optional($item->product)->name ?? 'N/A',
-                        'quantity' => $item->qty,
-                        'price' => $item->price,
-                        'subtotal' => $item->qty * $item->price,
-                    ];
-                });
-
-            $cartTotal = $cartItems->sum('quantity'); 
-        }
+        ] : null;        
 
         // Query only active products with primary image and avg rating
         $products = Product::with([
@@ -69,7 +48,7 @@ class HomeController extends Controller
         // Pass categories for filtering if you want
         $categories = Category::all();
         // dd($products, $categories, $user, $cartTotal);
-        return view('home', compact('products', 'categories', 'user', 'cartItems', 'cartTotal'));
+        return view('home', compact('products', 'categories', 'user'));
     }
 
     public function aboutUs()
