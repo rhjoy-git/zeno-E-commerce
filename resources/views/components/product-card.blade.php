@@ -44,7 +44,7 @@
                     class="flex justify-center items-center gap-2 px-6 py-4 tracking-[2px] bg-white text-black text-[16px] font-bold uppercase cursor-pointer">
                     Buy
                 </button>
-                <button id="add-to-cart-{{ $id }}" data-product-id="{{ $id }}" data-price="{{ $price }}"
+                <button data-product-id="{{ $id }}"
                     class="add-to-cart flex justify-center items-center gap-2 px-6 py-4 tracking-[2px] bg-white text-black text-[16px] font-bold uppercase">
                     Add Cart
                 </button>

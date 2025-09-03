@@ -31,7 +31,7 @@
 </head>
 
 <body class="bg-white text-black font-sans antialiased">
-    @include('partials.preloader')
+    {{-- @include('partials.preloader') --}}
     @include('frontend.navbar')
     {{-- @include('components.dynamic-navigation') --}}
     @yield('content')

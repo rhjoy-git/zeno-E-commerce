@@ -7,7 +7,6 @@ export default {
         "./vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php",
         "./storage/framework/views/*.php",
         "./resources/views/**/*.blade.php",
-        "./resources/**/*.blade.php",
         "./resources/**/*.js",
         "./resources/**/*.vue",
     ],
@@ -16,16 +15,25 @@ export default {
         extend: {
             fontFamily: {
                 sans: ["Albert Sans", ...defaultTheme.fontFamily.sans],
-                megumi: [
-                    "Megumi",
-                    "sans-serif",
-                    ...defaultTheme.fontFamily.sans,
-                ],
+                megumi: ["Megumi", "sans-serif", ...defaultTheme.fontFamily.sans],
             },
         },
     },
 
-    plugins: [forms],
+    plugins: [
+        forms,
+        function ({ addUtilities }) {
+            addUtilities({
+                ".no-scrollbar::-webkit-scrollbar": {
+                    display: "none",
+                },
+                ".no-scrollbar": {
+                    "-ms-overflow-style": "none", /* IE and Edge */
+                    "scrollbar-width": "none",    /* Firefox */
+                },
+            });
+        },
+    ],
 
     corePlugins: {
         ringColor: false,
@@ -33,5 +41,4 @@ export default {
         ringOpacity: false,
         outline: false,
     },
-    
 };

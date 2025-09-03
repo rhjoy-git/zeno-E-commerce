@@ -66,6 +66,8 @@ Route::get('/delivery-return-policy', function () {
 Route::controller(CustomerProductController::class)->group(function () {
     Route::get('/products', 'index')->name('products.list');
     Route::get('/products/{product}', 'show')->name('products.show');
+    Route::post('/products/variants', 'getVariants')->name('products.variants');
+
 });
 
 // Cart Routes

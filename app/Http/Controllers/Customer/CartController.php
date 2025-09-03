@@ -16,6 +16,7 @@ class CartController extends Controller
 {
     public function addToCart(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'qty' => 'required|integer|min:1',
@@ -23,7 +24,7 @@ class CartController extends Controller
             'size' => 'nullable|string|max:200',
             'variant_id' => 'nullable|exists:product_variants,id'
         ]);
-
+        // dd($request->all());
         $variantId = $request->variant_id;
         if ($variantId === '') {
             $variantId = null;
@@ -144,32 +145,32 @@ class CartController extends Controller
         $totalItems = 0;
 
         if (Auth::check()) {
-            // DB::enableQueryLog();
             $cartItems = ProductCart::with([
-                'product.primaryImage',
-                'product.activeVariants.size',
-                'product.activeVariants.color',
-                'product.availableSizes',
-                'product.availableColors',
-                'productVariant',
-                'productVariant.color',
-                'productVariant.size'
+                'product.images',
+                'product.variants.size',
+                'product.variants.color',
+                'variant',
+                'variant.size',
+                'variant.color'
             ])
                 ->where('user_id', Auth::id())
                 ->get();
-            // dd(DB::getQueryLog());
+
             $totalItems = $cartItems->sum('qty');
         } else {
             $sessionCart = Session::get('cart', []);
             foreach ($sessionCart as $id => $item) {
                 $product = Product::with('images')->find($item['product_id']);
+
+                if (!$product) continue; // Skip if product not found
+
                 $totalItems += $item['qty'];
 
                 $cartItems[] = (object) array_merge([
                     'id' => $id,
                     'session_id' => $id,
                     'product' => $product,
-                    'variant' => $item['variant_id'] ? ProductVariant::find($item['variant_id']) : null,
+                    'variant' => $item['variant_id'] ? ProductVariant::with(['size', 'color'])->find($item['variant_id']) : null,
                     'color' => $item['color'],
                     'size' => $item['size'],
                     'qty' => $item['qty'],
@@ -178,11 +179,11 @@ class CartController extends Controller
                     'sale_price' => $product->sale_price,
                     'product_code' => $product->sku ?? 'N/A',
                     'product_name' => $product->name,
-                    'product_image' => $product->images->first()->url ?? '/images/placeholder.jpg'
+                    'product_image' => $product->images->first()->image_path ?? '/images/placeholder.jpg' // Fixed this line
                 ], $item);
             }
         }
-        // dd($cartItems, $cartItems[0]->product);
+
         return view('customer.cart-item', compact('cartItems', 'totalItems'));
     }
 

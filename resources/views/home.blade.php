@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="no-scrollbar">
 
 <head>
     <meta charset="UTF-8">
@@ -27,11 +27,20 @@
     @stack('styles')
 </head>
 
-<body class="bg-white text-black font-sans antialiased">
+<body class="bg-white text-black font-sans antialiased no-scrollbar" x-data="{
+    isMobileMenuOpen: false,
+    searchOpen: false,
+    activeMenu: null,
+    activeSubmenu: null,
+    activeUser: false,
+    productCart: false
+}">
     <!-- Preloader -->
     @include('partials.preloader')
+    @include('partials.loading-overlay')
     @include('components.notification')
     {{-- @include('components.dynamic-navigation') --}}
+
     @include('frontend.navbar')
     @include('partials.flash-messages')
     @include('frontend.heroSection')
@@ -45,7 +54,10 @@
     @include('partials.membership')
     <hr>
     @include('frontend.footer')
+    @include('components.product-cart-popup')
+
     <div id="notification-container" class="fixed top-20 right-4 z-[9999] space-y-3 w-80 max-w-[90vw]"></div>
+
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('slider', (config) => ({
@@ -148,48 +160,65 @@
             },
         });
     </script>
+
     <script src="{{ asset('js/preloader.js') }}"></script>
+    <script src="{{ asset('js/helper.js') }}"></script>
+    
+    <!-- Global Config -->
+    <script>
+        window.appConfig = {
+        routes: {
+            productVariants: "{{ route('products.variants') }}",
+            cartAdd: "{{ route('cart.add') }}",
+        },
+        csrfToken: "{{ csrf_token() }}",
+    };
+    </script>
+    <script src="{{ asset('js/product-popup.js') }}"></script>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-        // Add to cart functionality for product cards
-        document.querySelectorAll('.add-to-cart').forEach(button => {
-            button.addEventListener('click', function() {
-                const productId = this.dataset.productId;
-                const price = this.dataset.price;
+          
+
+    // Add to cart functionality for product cards
+        // document.querySelectorAll('.popup-add-to-cart').forEach(button => {
+        //     button.addEventListener('click', function() {
+        //         const productId = this.dataset.productId;
+        //         const price = this.dataset.price;
                 
-                // Simple add to cart with default quantity 1
-                fetch('{{ route("cart.add") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        qty: 1,
-                        price: price
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Show success message
-                       notifications.success('Product added to cart!');                        
-                        // Update cart count
-                        document.querySelectorAll('.cart-counter').forEach(el => {
-                            el.textContent = data.cart_count;
-                        });
-                    } else {
-                       notifications.error('Error adding product to cart');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                notifications.error('Error adding product to cart');
-                });
-            });
-        });
+        //         // Simple add to cart with default quantity 1
+        //         fetch('{{ route("cart.add") }}', {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json',
+        //                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        //             },
+        //             body: JSON.stringify({
+        //                 product_id: productId,
+        //                 qty: 1,
+        //                 price: price
+        //             })
+        //         })
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             if (data.success) {
+        //                 // Show success message
+        //                notifications.success('Product added to cart!');                        
+        //                 // Update cart count
+        //                 document.querySelectorAll('.cart-counter').forEach(el => {
+        //                     el.textContent = data.cart_count;
+        //                 });
+        //             } else {
+        //                notifications.error('Error adding product to cart');
+        //             }
+        //         })
+        //         .catch(error => {
+        //             console.error('Error:', error);
+        //         notifications.error('Error adding product to cart');
+        //         });
+        //     });
+        // });
     });
 
     </script>

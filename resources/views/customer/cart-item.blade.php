@@ -59,16 +59,22 @@
                             <div class="mb-4">
                                 <div class="flex items-center gap-3 mb-2">
                                     <span class="text-base text-gray-800 font-medium">COLOR:</span>
-                                    <span class="text-base">{{ $item->productVariant->color->name ?? $item->color ??
-                                        'N/A' }}</span>
+                                    <span class="text-base">
+                                        {{ $item->variant->color->name ?? $item->color ?? 'N/A' }}
+                                    </span>
                                 </div>
-                                @if($item->product->availableColors && $item->product->availableColors->count() > 0)
+                                @if($item->product->variants && $item->product->variants->count() > 0)
                                 <div class="flex gap-2">
-                                    @foreach($item->product->availableColors as $color)
+                                    @php
+                                    $uniqueColors = $item->product->variants->unique('color_id')->pluck('color');
+                                    @endphp
+                                    @foreach($uniqueColors as $color)
+                                    @if($color)
                                     <button
-                                        class="w-4 h-4 border border-gray-300 {{ $item->productVariant && $item->productVariant->color_id == $color->id ? 'border-2 border-black' : '' }}"
+                                        class="w-4 h-4 border border-gray-300 {{ $item->variant && $item->variant->color_id == $color->id ? 'border-2 border-black' : '' }}"
                                         style="background-color: {{ $color->hex_code }}"
                                         title="{{ $color->name }}"></button>
+                                    @endif
                                     @endforeach
                                 </div>
                                 @else
@@ -126,9 +132,9 @@
                                     <span class="text-base text-gray-800 font-medium">QTY:</span>
                                     <select
                                         class="item-qty px-1.5 py-1 bg-gray-200 border-none focus:outline-none focus:ring-0 text-sm w-12 cursor-pointer">
-                                        @for($i = 1; $i <= 10; $i++) 
-                                            <option value="{{ $i }}" {{ $item->qty == $i ? 'selected' : '' }}>{{ $i }} </option>
-                                        @endfor
+                                        @for($i = 1; $i <= 10; $i++) <option value="{{ $i }}" {{ $item->qty == $i ?
+                                            'selected' : '' }}>{{ $i }} </option>
+                                            @endfor
                                     </select>
                                 </div>
                             </div>
