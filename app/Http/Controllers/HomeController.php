@@ -28,7 +28,6 @@ class HomeController extends Controller
             ->withAvg('approvedReviews as avg_rating', 'rating')
             ->where('status', 'active')
             ->orderBy('created_at', 'desc')
-            ->limit(8)
             ->get()
             ->map(function ($product) {
                 return [

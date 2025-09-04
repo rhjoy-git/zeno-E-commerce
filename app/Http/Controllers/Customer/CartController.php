@@ -10,6 +10,7 @@ use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CartController extends Controller
@@ -145,6 +146,7 @@ class CartController extends Controller
         $totalItems = 0;
 
         if (Auth::check()) {
+
             $cartItems = ProductCart::with([
                 'product.images',
                 'product.variants.size',
@@ -155,8 +157,51 @@ class CartController extends Controller
             ])
                 ->where('user_id', Auth::id())
                 ->get();
-
             $totalItems = $cartItems->sum('qty');
+
+            // dd($cartItems);
+            // Transform to a simplified array
+            $formattedItems = $cartItems->map(function ($cartItem) {
+                return [
+                    'product' => [
+                        'id' => $cartItem->product->id ?? 'N/A',
+                        'name' => $cartItem->product->title ?? 'N/A',
+                        'price' => $cartItem->product->price ?? 'N/A',
+                        'images' => $cartItem->product->images->map(function ($image) {
+                            return [
+                                'id' => $image->id,
+                                'path' => Storage::url($image->image_path),
+                                'is_primary' => $image->is_primary
+                            ];
+                        }),
+                        'variants' => $cartItem->product->variants->where('status', 'active')->map(function ($variant) {
+                            return [
+                                'id' => $variant->id,
+                                'color_id' => $variant->color_id,
+                                'color_name' => $variant->color ? $variant->color->name : null,
+                                'color_hex' => $variant->color ? $variant->color->hex_code : null,
+                                'size_id' => $variant->size_id,
+                                'size_name' => $variant->size ? $variant->size->name : null,
+                                'price' => $variant->price,
+                                'stock_quantity' => $variant->stock_quantity,
+                                'sku' => $variant->sku
+                            ];
+                        })->values()
+                    ],
+                    'selected_variant' => [
+                        'id' => $cartItem->id ?? 'N/A',
+                        'size' => $cartItem->size ?? 'N/A',
+                        'color' => $cartItem->color ?? 'N/A',
+                    ],
+                    'quantity' => $cartItem->qty ?? 'N/A',
+                    'subtotal' => $cartItem->subtotal ?? 'N/A',
+                    'price' => $cartItem->price ?? 'N/A',
+                ];
+            })->toArray();
+
+            // Output as JSON
+            echo json_encode($formattedItems, JSON_PRETTY_PRINT);
+            exit;
         } else {
             $sessionCart = Session::get('cart', []);
             foreach ($sessionCart as $id => $item) {
