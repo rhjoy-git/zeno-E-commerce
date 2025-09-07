@@ -44,6 +44,15 @@
     <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.3/dist/js/splide.min.js"></script>
     <!-- Initialize Swiper JS -->
     {{-- <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script> --}}
+    <!-- Global Config -->
+    <script>
+        window.appConfig = {
+        routes: {
+            getVariantPrice: "{{ route('cart.get-variant-price') }}",      
+        },
+        csrfToken: "{{ csrf_token() }}",
+    };
+    </script>
     @stack('scripts')
 </body>
 

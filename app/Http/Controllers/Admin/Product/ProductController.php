@@ -21,7 +21,7 @@ class ProductController extends Controller
     {
         $products = Product::with(['category', 'brand', 'images' => function ($q) {
             $q->where('is_primary', true);
-        }])->latest()->paginate(5);
+        }])->latest()->paginate(20);
 
         $categories = Category::active()->get();
         $brands     = Brand::active()->get();

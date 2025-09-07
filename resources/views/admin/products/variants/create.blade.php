@@ -17,8 +17,7 @@
 
                 <div id="variants-container">
                     <!-- First variant row -->
-                    <div
-                        class="variant-row grid grid-cols-2 md:grid-cols-4 gap-6 mb-6 p-4 border border-gray-200 ">
+                    <div class="variant-row grid grid-cols-2 md:grid-cols-4 gap-6 mb-6 p-4 border border-gray-200 ">
                         <!-- Color Selection -->
                         <div>
                             <label for="color_id_0" class="block text-sm font-medium text-gray-700 mb-1">Color <span
@@ -224,218 +223,172 @@
             `;
             
             variantsContainer.appendChild(newVariantRow);
-            variantCount++;
-            
-            // Show remove buttons if there's more than one variant
-            updateRemoveButtonsVisibility();
-            
-            // Add event listeners to the new selects
-            const newColorSelect = newVariantRow.querySelector('.color-select');
-            const newSizeSelect = newVariantRow.querySelector('.size-select');
-            const newSkuInput = newVariantRow.querySelector('.sku-input');
-            const newGenerateSkuBtn = newVariantRow.querySelector('.generate-sku-btn');
-            
-            newColorSelect.addEventListener('change', function() {
-                validateVariantCombination(this);
-            });
-            
-            newSizeSelect.addEventListener('change', function() {
-                validateVariantCombination(this);
-            });
-            
-            newSkuInput.addEventListener('input', function() {
-                validateSku(this);
-            });
-            
-            newGenerateSkuBtn.addEventListener('click', function() {
-                generateSku(this);
-            });
-        });
-        
-        // Remove variant button handler (event delegation)
-        variantsContainer.addEventListener('click', function(e) {
-            if (e.target.closest('.remove-variant-btn')) {
-                const variantRow = e.target.closest('.variant-row');
-                if (document.querySelectorAll('.variant-row').length > 1) {
-                    variantRow.remove();
-                    updateRemoveButtonsVisibility();
-                }
-            }
-        });
-        
-        // Update remove buttons visibility
-        function updateRemoveButtonsVisibility() {
-            const removeButtons = document.querySelectorAll('.remove-variant-btn');
-            removeButtons.forEach(btn => {
-                if (document.querySelectorAll('.variant-row').length > 1) {
-                    btn.classList.remove('hidden');
-                } else {
-                    btn.classList.add('hidden');
-                }
-            });
-        }
-        
-        // Validate variant combination (color + size)
-        function validateVariantCombination(selectElement) {
-            const index = selectElement.dataset.index;
-            const colorSelect = document.getElementById(`color_id_${index}`);
-            const sizeSelect = document.getElementById(`size_id_${index}`);
-            const colorError = colorSelect.parentElement.querySelector('.color-error');
-            const sizeError = sizeSelect.parentElement.querySelector('.size-error');
-            
-            const colorId = colorSelect.value;
-            const sizeId = sizeSelect.value;
-            
-            // Reset errors
-            colorError.classList.add('hidden');
-            sizeError.classList.add('hidden');
-            colorError.textContent = '';
-            sizeError.textContent = '';
-            
-            if (!colorId || !sizeId) return;
-            
-            // Check if combination already exists
-            fetch('{{ route("admin.products.variants.checkCombination", $product->id) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    color_id: colorId,
-                    size_id: sizeId
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.exists) {
-                    colorError.textContent = 'This color and size combination already exists for this product.';
-                    colorError.classList.remove('hidden');
-                    sizeError.textContent = 'This color and size combination already exists for this product.';
-                    sizeError.classList.remove('hidden');
-                    
-                    // Disable form submission for this variant
-                    colorSelect.setCustomValidity('Combination exists');
-                    sizeSelect.setCustomValidity('Combination exists');
-                } else {
-                    colorSelect.setCustomValidity('');
-                    sizeSelect.setCustomValidity('');
-                }
-            })
-            .catch(error => {
-                console.error('Error validating variant combination:', error);
-            });
-        }
-        
-        // Validate SKU
-        function validateSku(skuInput) {
-            const index = skuInput.id.split('_')[1];
-            const skuError = skuInput.parentElement.parentElement.querySelector('.sku-error');
-            const sku = skuInput.value.trim();
-            
-            // Clear previous timeout to prevent multiple fetch calls
-            clearTimeout(skuInput.validationTimeout);
-            
-            // Only start validation if the input is long enough
-            if (sku.length >= 3) {
-                // Set a new timeout to wait for user to stop typing
-                skuInput.validationTimeout = setTimeout(() => {
-                    fetch('{{ route("admin.products.variants.checkSku", $product->id) }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({ sku: sku })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (!data.isAvailable) {
-                            skuError.textContent = data.message;
-                            skuError.classList.remove('hidden');
-                            skuInput.setCustomValidity('SKU already exists');
-                        } else {
-                            skuError.classList.add('hidden');
-                            skuInput.setCustomValidity('');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error validating SKU:', error);
-                    });
-                }, 500);
-            } else {
-                // Reset validation state if input is too short
-                skuError.classList.add('hidden');
-                skuInput.setCustomValidity('');
-            }
-        }
-        
-        // Generate SKU
-        function generateSku(button) {
-            const index = button.dataset.index;
-            const skuInput = document.getElementById(`sku_${index}`);
-            const skuError = skuInput.parentElement.parentElement.querySelector('.sku-error');
-            
-            const randomSKU = 'PROD-VAR-' + Math.floor(10000 + Math.random() * 99999);
-            skuInput.value = randomSKU;
-            
-            // Validate the generated SKU
-            fetch('{{ route("admin.products.variants.checkSku", $product->id) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ sku: randomSKU })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (!data.isAvailable) {
-                    skuError.textContent = data.message;
-                    skuError.classList.remove('hidden');
-                    skuInput.setCustomValidity('SKU already exists');
-                } else {
-                    skuError.classList.add('hidden');
-                    skuInput.setCustomValidity('');
-                }
-            })
-            .catch(error => {
-                console.error('Error validating SKU:', error);
-            });
-        }
-        
-        // Add event listeners to initial elements
-        const initialColorSelect = document.querySelector('.color-select');
-        const initialSizeSelect = document.querySelector('.size-select');
-        const initialSkuInput = document.querySelector('.sku-input');
-        const initialGenerateSkuBtn = document.querySelector('.generate-sku-btn');
-        
-        if (initialColorSelect) {
-            initialColorSelect.addEventListener('change', function() {
-                validateVariantCombination(this);
-            });
-        }
-        
-        if (initialSizeSelect) {
-            initialSizeSelect.addEventListener('change', function() {
-                validateVariantCombination(this);
-            });
-        }
-        
-        if (initialSkuInput) {
-            initialSkuInput.addEventListener('input', function() {
-                validateSku(this);
-            });
-        }
-        
-        if (initialGenerateSkuBtn) {
-            initialGenerateSkuBtn.addEventListener('click', function() {
-                generateSku(this);
-            });
-        }
-        
-        // Initialize remove button visibility
+        variantCount++;
+
+        // Attach listeners
+        attachVariantListeners(newVariantRow, newIndex);
+
         updateRemoveButtonsVisibility();
     });
+
+    // Attach events for new rows
+    function attachVariantListeners(row, index) {
+        const colorSelect = row.querySelector('.color-select');
+        const sizeSelect = row.querySelector('.size-select');
+        const skuInput = row.querySelector('.sku-input');
+        const generateSkuBtn = row.querySelector('.generate-sku-btn');
+
+        colorSelect.addEventListener('change', () => validateVariantCombination(index));
+        sizeSelect.addEventListener('change', () => validateVariantCombination(index));
+        skuInput.addEventListener('input', () => validateSku(index));
+        generateSkuBtn.addEventListener('click', () => generateSku(index));
+    }
+
+    // Check duplicate color+size
+    function validateVariantCombination(index) {
+        const colorSelect = document.getElementById(`color_id_${index}`);
+        const sizeSelect = document.getElementById(`size_id_${index}`);
+        const colorError = colorSelect.parentElement.querySelector('.color-error');
+        const sizeError = sizeSelect.parentElement.querySelector('.size-error');
+
+        const colorId = colorSelect.value;
+        const sizeId = sizeSelect.value;
+
+        colorError.classList.add('hidden');
+        sizeError.classList.add('hidden');
+
+        if (!colorId || !sizeId) return;
+
+        // 1. Frontend duplicate check (same form)
+        let duplicateFound = false;
+        document.querySelectorAll('.variant-row').forEach(row => {
+            const rowIndex = row.querySelector('.color-select').dataset.index;
+            if (rowIndex != index) {
+                const otherColor = document.getElementById(`color_id_${rowIndex}`).value;
+                const otherSize = document.getElementById(`size_id_${rowIndex}`).value;
+                if (otherColor === colorId && otherSize === sizeId) {
+                    duplicateFound = true;
+                }
+            }
+        });
+
+        if (duplicateFound) {
+            colorError.textContent = 'This color-size is already selected in another row.';
+            sizeError.textContent = 'This color-size is already selected in another row.';
+            colorError.classList.remove('hidden');
+            sizeError.classList.remove('hidden');
+            colorSelect.setCustomValidity('Duplicate');
+            sizeSelect.setCustomValidity('Duplicate');
+            return;
+        }
+
+        // 2. Backend check (DB)
+        fetch('{{ route("admin.products.variants.checkCombination", $product->id) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ color_id: colorId, size_id: sizeId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.exists) {
+                colorError.textContent = 'This color-size already exists in DB.';
+                sizeError.textContent = 'This color-size already exists in DB.';
+                colorError.classList.remove('hidden');
+                sizeError.classList.remove('hidden');
+                colorSelect.setCustomValidity('Duplicate');
+                sizeSelect.setCustomValidity('Duplicate');
+            } else {
+                colorSelect.setCustomValidity('');
+                sizeSelect.setCustomValidity('');
+            }
+        });
+    }
+
+    // Check duplicate SKU
+    function validateSku(index) {
+        const skuInput = document.getElementById(`sku_${index}`);
+        const skuError = skuInput.parentElement.parentElement.querySelector('.sku-error');
+        const sku = skuInput.value.trim();
+
+        skuError.classList.add('hidden');
+        skuInput.setCustomValidity('');
+
+        if (!sku) return;
+
+        // 1. Frontend duplicate check
+        let duplicateFound = false;
+        document.querySelectorAll('.sku-input').forEach((input, idx) => {
+            if (input.id !== skuInput.id && input.value.trim() === sku) {
+                duplicateFound = true;
+            }
+        });
+
+        if (duplicateFound) {
+            skuError.textContent = 'This SKU is already used in another row.';
+            skuError.classList.remove('hidden');
+            skuInput.setCustomValidity('Duplicate');
+            return;
+        }
+
+        // 2. Backend check
+        fetch('{{ route("admin.products.variants.checkSku", $product->id) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ sku: sku })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.isAvailable) {
+                skuError.textContent = data.message;
+                skuError.classList.remove('hidden');
+                skuInput.setCustomValidity('Duplicate');
+            } else {
+                skuInput.setCustomValidity('');
+            }
+        });
+    }
+
+    // Generate SKU
+    function generateSku(index) {
+        const skuInput = document.getElementById(`sku_${index}`);
+        const randomSKU = 'PROD-VAR-' + Math.floor(10000 + Math.random() * 90000);
+        skuInput.value = randomSKU;
+        validateSku(index);
+    }
+
+    // Remove button
+    variantsContainer.addEventListener('click', e => {
+        if (e.target.closest('.remove-variant-btn')) {
+            const row = e.target.closest('.variant-row');
+            if (document.querySelectorAll('.variant-row').length > 1) {
+                row.remove();
+                updateRemoveButtonsVisibility();
+            }
+        }
+    });
+
+    function updateRemoveButtonsVisibility() {
+        const removeButtons = document.querySelectorAll('.remove-variant-btn');
+        removeButtons.forEach(btn => {
+            if (document.querySelectorAll('.variant-row').length > 1) {
+                btn.classList.remove('hidden');
+            } else {
+                btn.classList.add('hidden');
+            }
+        });
+    }
+
+    // Initial setup
+    attachVariantListeners(document.querySelector('.variant-row'), 0);
+    updateRemoveButtonsVisibility();
+});
 </script>
+
+
 @endsection

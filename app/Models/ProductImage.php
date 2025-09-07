@@ -20,6 +20,7 @@ class ProductImage extends Model
   protected $casts = [
     'is_primary' => 'boolean',
   ];
+  
   public function product()
   {
     return $this->belongsTo(Product::class);

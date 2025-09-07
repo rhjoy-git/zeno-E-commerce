@@ -28,6 +28,10 @@ class ProductCart extends Model
     {
         return $this->belongsTo(Product::class);
     }
+    public function activeProduct()
+    {
+        return $this->belongsTo(Product::class)->where('status', 'active');
+    }
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -36,6 +40,11 @@ class ProductCart extends Model
     {
         return $this->belongsTo(ProductVariant::class, 'variant_id');
     }
+    public function activeVariant()
+    {
+        return $this->belongsTo(ProductVariant::class, 'variant_id')->where('status', 'active');
+    }
+
     // protected static function booted()
     // {
     //     static::creating(function ($cart) {

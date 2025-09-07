@@ -139,99 +139,104 @@ class CartController extends Controller
             $request->size
         ]));
     }
-
     public function index()
     {
         $cartItems = [];
         $totalItems = 0;
 
         if (Auth::check()) {
-
             $cartItems = ProductCart::with([
-                'product.images',
-                'product.variants.size',
-                'product.variants.color',
-                'variant',
-                'variant.size',
-                'variant.color'
+                'product' => function ($q) {
+                    $q->where('status', 'active')
+                        ->with(['images', 'variants.size', 'variants.color']);
+                },
+                'activeVariant',
+                'activeVariant.size',
+                'activeVariant.color'
             ])
                 ->where('user_id', Auth::id())
                 ->get();
+
             $totalItems = $cartItems->sum('qty');
-
-            // dd($cartItems);
-            // Transform to a simplified array
-            $formattedItems = $cartItems->map(function ($cartItem) {
-                return [
-                    'product' => [
-                        'id' => $cartItem->product->id ?? 'N/A',
-                        'name' => $cartItem->product->title ?? 'N/A',
-                        'price' => $cartItem->product->price ?? 'N/A',
-                        'images' => $cartItem->product->images->map(function ($image) {
-                            return [
-                                'id' => $image->id,
-                                'path' => Storage::url($image->image_path),
-                                'is_primary' => $image->is_primary
-                            ];
-                        }),
-                        'variants' => $cartItem->product->variants->where('status', 'active')->map(function ($variant) {
-                            return [
-                                'id' => $variant->id,
-                                'color_id' => $variant->color_id,
-                                'color_name' => $variant->color ? $variant->color->name : null,
-                                'color_hex' => $variant->color ? $variant->color->hex_code : null,
-                                'size_id' => $variant->size_id,
-                                'size_name' => $variant->size ? $variant->size->name : null,
-                                'price' => $variant->price,
-                                'stock_quantity' => $variant->stock_quantity,
-                                'sku' => $variant->sku
-                            ];
-                        })->values()
-                    ],
-                    'selected_variant' => [
-                        'id' => $cartItem->id ?? 'N/A',
-                        'size' => $cartItem->size ?? 'N/A',
-                        'color' => $cartItem->color ?? 'N/A',
-                    ],
-                    'quantity' => $cartItem->qty ?? 'N/A',
-                    'subtotal' => $cartItem->subtotal ?? 'N/A',
-                    'price' => $cartItem->price ?? 'N/A',
-                ];
-            })->toArray();
-
-            // Output as JSON
-            echo json_encode($formattedItems, JSON_PRETTY_PRINT);
-            exit;
         } else {
             $sessionCart = Session::get('cart', []);
             foreach ($sessionCart as $id => $item) {
-                $product = Product::with('images')->find($item['product_id']);
-
-                if (!$product) continue; // Skip if product not found
+                $product = Product::with(['images', 'variants.size', 'variants.color'])->find($item['product_id']);
+                if (!$product) continue;
 
                 $totalItems += $item['qty'];
 
-                $cartItems[] = (object) array_merge([
-                    'id' => $id,
-                    'session_id' => $id,
-                    'product' => $product,
-                    'variant' => $item['variant_id'] ? ProductVariant::with(['size', 'color'])->find($item['variant_id']) : null,
-                    'color' => $item['color'],
-                    'size' => $item['size'],
-                    'qty' => $item['qty'],
-                    'price' => $item['price'],
-                    'original_price' => $product->price,
-                    'sale_price' => $product->sale_price,
-                    'product_code' => $product->sku ?? 'N/A',
-                    'product_name' => $product->name,
-                    'product_image' => $product->images->first()->image_path ?? '/images/placeholder.jpg' // Fixed this line
-                ], $item);
+                $cartItems[] = (object) [
+                    'id'       => $id,
+                    'product'  => $product,
+                    'variant'  => $item['variant_id'] ? ProductVariant::with(['size', 'color'])->find($item['variant_id']) : null,
+                    'qty'      => $item['qty'],
+                    'price'    => $item['price'],
+                    'subtotal' => $item['qty'] * $item['price'],
+                    'color'    => $item['color'] ?? null,
+                    'size'     => $item['size'] ?? null,
+                ];
             }
         }
 
         return view('customer.cart-item', compact('cartItems', 'totalItems'));
     }
 
+    public function getVariantPrice(Request $request)
+    {
+        $productId = $request->product_id;
+        $colorId   = $request->color_id;
+        $sizeId    = $request->size_id;
+
+        $variant = ProductVariant::with(['size', 'color'])
+            ->where('product_id', $productId)
+            ->when($colorId, fn($q) => $q->where('color_id', $colorId))
+            ->when($sizeId, fn($q) => $q->where('size_id', $sizeId))
+            ->first();
+
+        if (!$variant) {
+            return response()->json(['error' => 'Variant not found'], 404);
+        }
+
+        return response()->json([
+            'id'             => $variant->id,
+            'price'          => $variant->price,
+            'stock_quantity' => $variant->stock_quantity,
+            'sku'            => $variant->sku,
+            'color'          => $variant->color?->name,
+            'size'           => $variant->size?->name,
+        ]);
+    }
+    public function getSizes(Request $request)
+    {
+        $productId = $request->product_id;
+        $colorId   = $request->color_id;
+
+        $sizes = ProductVariant::with('size')
+            ->where('product_id', $productId)
+            ->where('color_id', $colorId)
+            ->get()
+            ->pluck('size')
+            ->unique('id')
+            ->values();
+
+        return response()->json($sizes);
+    }
+    public function getColors(Request $request)
+    {
+        $productId = $request->product_id;
+        $sizeId   = $request->size_id;
+
+        $colors = ProductVariant::with('color')
+            ->where('product_id', $productId)
+            ->where('size_id', $sizeId)
+            ->get()
+            ->pluck('color')
+            ->unique('id')
+            ->values();
+
+        return response()->json($colors);
+    }
     public function update(Request $request, $item)
     {
         $request->validate([
@@ -337,7 +342,9 @@ class CartController extends Controller
     public static function getCartCountStatic()
     {
         if (Auth::check()) {
-            return ProductCart::where('user_id', Auth::id())->sum('qty');
+            return ProductCart::with(['product' => function ($q) {
+                $q->where('status', 'active');
+            }])->where('user_id', Auth::id())->sum('qty');
         }
 
         $cart = Session::get('cart', []);
