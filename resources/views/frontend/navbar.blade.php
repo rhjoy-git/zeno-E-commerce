@@ -192,7 +192,7 @@
                     @include('partials.user-dropdown')
 
                     <!-- Cart Icon -->
-                    <button onclick="window.location.href='{{ route('cart.items') }}'"
+                    <button onclick="window.location.href='{{ route('cart.index') }}'"
                         class="p-2 hover:text-gray-700 relative mr-2 last:mr-0">
                         <svg width="28" height="28" viewBox="0 0 28 28" fill="none"
                             xmlns="http://www.w3.org/2000/svg">

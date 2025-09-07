@@ -12,45 +12,70 @@ use Illuminate\Support\Facades\Session;
 
 class CheckoutController extends Controller
 {
-    public function checkout()
+    public function checkout(Request $request)
     {
-        $cartItems = [];
-        $totals = [
-            'order_value' => 0,
-            'total_discount' => 0,
-            'vat_amount' => 0,
-            'total_price' => 0
-        ];
+        $selected = json_decode($request->selected_items, true);
+        dd($selected);
+        // Fetch only selected items from DB
+        $cartItems = ProductCart::with('product', 'variant')
+            ->whereIn('id', $selected)
+            ->where('user_id', Auth::id())
+            ->get();
 
-        if (Auth::check()) {
-            $cartItems = ProductCart::with([
-                'product.primaryImage',
-                'productVariant.color',
-                'productVariant.size'
-            ])->where('user_id', Auth::id())->get();
-
-            $totals = $this->calculateCheckoutTotals($cartItems);
-        } else {
-            $sessionCart = Session::get('cart', []);
-            foreach ($sessionCart as $id => $itemData) {
-                $product = Product::with('images')->find($itemData['product_id']);
-
-                $cartItems[] = (object) [
-                    'id' => $id,
-                    'product' => $product,
-                    'productVariant' => $itemData['variant_id'] ? ProductVariant::find($itemData['variant_id']) : null,
-                    'color' => $itemData['color'],
-                    'size' => $itemData['size'],
-                    'qty' => $itemData['qty'],
-                    'price' => $itemData['price'],
-                    'product_name' => $product->title,
-                    'product_image' => $product->images->first()->image_path ?? '/images/placeholder.jpg'
-                ];
-            }
-            $totals = $this->calculateCheckoutTotals($cartItems);
+        if ($cartItems->isEmpty()) {
+            return redirect()->route('cart.index')->with('error', 'No items selected for checkout.');
         }
-        dd($cartItems, $totals);
-        return view('customer.checkout', compact('cartItems', 'totals'));
+
+        return view('customer.checkout', compact('cartItems'));
+    }
+
+
+    /**
+     * Cart update helper
+     */
+    private function updateCartItem($itemId, $variantId = null, $qty = 1, $color = null, $size = null)
+    {
+        if (Auth::check()) {
+            $cartItem = ProductCart::where('user_id', Auth::id())->find($itemId);
+            if ($cartItem) {
+                $cartItem->variant_id = $variantId;
+                $cartItem->qty = $qty;
+                $cartItem->color = $color;
+                $cartItem->size = $size;
+
+                // variant এর price set করি
+                if ($variantId) {
+                    $variant = ProductVariant::find($variantId);
+                    if ($variant) {
+                        $cartItem->price = $variant->price;
+                    }
+                } else {
+                    $cartItem->price = $cartItem->product->sale_price ?: $cartItem->product->price;
+                }
+
+                $cartItem->save();
+            }
+        } else {
+            $cart = Session::get('cart', []);
+            if (isset($cart[$itemId])) {
+                $cart[$itemId]['variant_id'] = $variantId;
+                $cart[$itemId]['qty'] = $qty;
+                $cart[$itemId]['color'] = $color;
+                $cart[$itemId]['size'] = $size;
+
+                if ($variantId) {
+                    $variant = ProductVariant::find($variantId);
+                    if ($variant) {
+                        $cart[$itemId]['price'] = $variant->price;
+                    }
+                } else {
+                    $product = Product::find($cart[$itemId]['product_id']);
+                    $cart[$itemId]['price'] = $product->sale_price ?: $product->price;
+                }
+
+                Session::put('cart', $cart);
+            }
+        }
     }
 
     private function calculateCheckoutTotals($cartItems)
@@ -63,7 +88,6 @@ class CheckoutController extends Controller
             $itemTotal = $item->price * $item->qty;
             $orderValue += $itemTotal;
 
-            // Calculate discount if product has discount
             if ($item->product->discount && $item->product->discount_price) {
                 $originalTotal = $item->product->price * $item->qty;
                 $discountedTotal = $item->product->discount_price * $item->qty;
@@ -84,7 +108,6 @@ class CheckoutController extends Controller
 
     public function placeOrder(Request $request)
     {
-        // Validate the request
         $request->validate([
             'full_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
@@ -93,17 +116,11 @@ class CheckoutController extends Controller
             'payment_method' => 'required|in:cod,bkash,mobile-banking,card'
         ]);
 
-        // Here you would:
-        // 1. Create an order record
-        // 2. Create order items from cart
-        // 3. Process payment based on method
-        // 4. Clear the cart
-        // 5. Send confirmation email
-
+        // Order process (এখন dummy)
         return response()->json([
             'success' => true,
             'message' => 'Order placed successfully',
-            'order_id' => 'ORD123456' // Generated order ID
+            'order_id' => 'ORD123456'
         ]);
     }
 }
