@@ -36,6 +36,8 @@ class Product extends Model
         'stock_alert' => 'integer',
         'has_variants' => 'boolean',
     ];
+    protected $with = ['primaryImage', 'category', 'brand'];
+
     public function category()
     {
         return $this->belongsTo(Category::class);
@@ -106,6 +108,13 @@ class Product extends Model
     {
         return $query->where('stock_quantity', '>', 0);
     }
+    public function getFinalPriceAttribute()
+    {
+        return $this->discount && $this->discount_price
+            ? $this->discount_price
+            : $this->price;
+    }
+
     public function availableSizes()
     {
         return $this->hasManyThrough(

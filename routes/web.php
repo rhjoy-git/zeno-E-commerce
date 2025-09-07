@@ -67,7 +67,6 @@ Route::controller(CustomerProductController::class)->group(function () {
     Route::get('/products', 'index')->name('products.list');
     Route::get('/products/{product}', 'show')->name('products.show');
     Route::post('/products/variants', 'getVariants')->name('products.variants');
-
 });
 
 // Cart Routes
@@ -77,6 +76,9 @@ Route::prefix('cart')->middleware('syncCart')->name('cart.')->controller(CartCon
     Route::post('/update/{item}', 'update')->name('update');
     Route::post('/remove/{item}', 'remove')->name('remove');
     Route::post('/sync', 'syncCart')->name('sync');
+    Route::post('/get-sizes', ['getSizes'])->name('get-sizes');
+    Route::post('/get-colors', ['getColors'])->name('get-colors');
+    Route::post('/get-variant-price', ['getVariantPrice'])->name('get-variant-price');
 });
 
 // ==================== AUTHENTICATION ROUTES ====================
