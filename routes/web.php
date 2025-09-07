@@ -72,13 +72,13 @@ Route::controller(CustomerProductController::class)->group(function () {
 // Cart Routes
 Route::prefix('cart')->middleware('syncCart')->name('cart.')->controller(CartController::class)->group(function () {
     Route::post('/add', 'addToCart')->name('add');
-    Route::get('/items', 'index')->name('items');
+    Route::get('/items', 'index')->name('index');
     Route::post('/update/{item}', 'update')->name('update');
     Route::post('/remove/{item}', 'remove')->name('remove');
     Route::post('/sync', 'syncCart')->name('sync');
-    Route::post('/get-sizes', ['getSizes'])->name('get-sizes');
-    Route::post('/get-colors', ['getColors'])->name('get-colors');
-    Route::post('/get-variant-price', ['getVariantPrice'])->name('get-variant-price');
+    Route::post('/get-sizes', 'getSizes')->name('get-sizes');
+    Route::post('/get-colors', 'getColors')->name('get-colors');
+    Route::post('/get-variant-price', 'getVariantPrice')->name('get-variant-price');
 });
 
 // ==================== AUTHENTICATION ROUTES ====================
@@ -146,7 +146,7 @@ Route::middleware(['auth', 'customer'])->prefix('customer')->name('customer.')->
 
     // Checkout
     Route::controller(CheckoutController::class)->group(function () {
-        Route::get('/checkout', 'checkout')->name('checkout');
+        Route::post('/checkout', 'checkout')->name('checkout');
         Route::post('/checkout/place-order', 'placeOrder')->name('checkout.placeOrder');
     });
 });

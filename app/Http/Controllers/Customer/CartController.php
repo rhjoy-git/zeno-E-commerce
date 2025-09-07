@@ -181,7 +181,6 @@ class CartController extends Controller
 
         return view('customer.cart-item', compact('cartItems', 'totalItems'));
     }
-
     public function getVariantPrice(Request $request)
     {
         $productId = $request->product_id;
@@ -237,6 +236,8 @@ class CartController extends Controller
 
         return response()->json($colors);
     }
+
+    
     public function update(Request $request, $item)
     {
         $request->validate([
