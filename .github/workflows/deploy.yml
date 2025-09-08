@@ -59,7 +59,11 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /zeno.endbrackets.com/
+
+          server-dir: /
+
+
+
           local-dir: ./public/
           exclude: |
             **/.git*
