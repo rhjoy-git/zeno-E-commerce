@@ -1,70 +1,73 @@
-name: Deploy Laravel Zeno to FTP
+name: Deploy Laravel to FTP
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]   # শুধু main branch এ push হলেই deploy হবে
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. GitHub থেকে কোড নামানো
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # 2. PHP setup
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.2"
+          php-version: '8.2'
           extensions: mbstring, bcmath, xml, ctype, json, tokenizer, pdo_mysql, gd
           coverage: none
 
+      # 3. Composer dependencies install (production mode)
       - name: Install Composer dependencies
         run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
+      # 4. Node/NPM install
       - name: Install npm dependencies
         run: npm ci --prefer-offline --no-audit
 
+      # 5. Build assets
       - name: Build assets
         run: npm run build
 
-      - name: Cleanup before deploy
-        run: |
-          rm -rf node_modules/
-          rm -rf tests/
-          rm -f .env.example
-          rm -f phpunit.xml
-          rm -f webpack.mix.js
-
-      # Deploy Core files to ZenoProject folder
-      - name: Deploy Core to FTP
+      # 6. Core Laravel ফাইল deploy (app, routes, vendor ইত্যাদি)
+      - name: Deploy Laravel Core to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.3
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /
-          local-dir: ./
+          server-dir: ZenoProject/   # /home/username/ZenoProject/
+          local-dir: ./             # পুরো repo থেকে
           exclude: |
-            **/.git*
-            **/.github*
+            **/public/**
             **/node_modules/**
             **/tests/**
+            **/.git*
+            **/.github*
             **/.env*
+            **/storage/**
+            **/bootstrap/cache/**
+            composer.json
+            composer.lock
+            package.json
+            package-lock.json
+            webpack.mix.js
+            vite.config.js
 
-      # Deploy Public files to subdomain folder
+      # 7. Public ফাইল deploy (index.php + assets)
       - name: Deploy Public to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.3
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /
-
-          local-dir: ./public/
+          server-dir: zeno.endbrackets.com/   # /home/username/zeno.endbrackets.com/
+          local-dir: ./public/                # শুধু public ফোল্ডার
           exclude: |
             **/.git*
-            **/.github*
-            **/storage/**
+            **/.env*
             **/node_modules/**
-            **/tests/**
