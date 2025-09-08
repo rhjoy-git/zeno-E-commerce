@@ -758,13 +758,53 @@
             initCart();
         });
 
+        // document.querySelector('#checkoutForm').addEventListener('submit', function(e) {
+        //     const selected = [];
+        //     document.querySelectorAll('.cart-item .item-checkbox:checked').forEach(cb => {
+        //         selected.push(cb.closest('.cart-item').dataset.itemId);
+        //     });
+        //     document.getElementById('selectedItemsInput').value = JSON.stringify(selected);
+        // });
+
         document.querySelector('#checkoutForm').addEventListener('submit', function(e) {
-            const selected = [];
+            const selectedItemsData = [];
             document.querySelectorAll('.cart-item .item-checkbox:checked').forEach(cb => {
-                selected.push(cb.closest('.cart-item').dataset.itemId);
+                const itemElement = cb.closest('.cart-item');
+
+                // Collect data from the main cart-item div
+                const itemData = {
+                    itemId: itemElement.dataset.itemId,
+                    productId: itemElement.dataset.productId,
+                    price: itemElement.dataset.price,
+                    originalPrice: itemElement.dataset.originalPrice,
+                    qty: itemElement.dataset.qty,
+                    hasVariants: itemElement.dataset.hasVariants
+                };
+
+                // Find and collect data for the selected color
+                const selectedColor = itemElement.querySelector('.color-option.selected');
+                if (selectedColor) {
+                    itemData.colorId = selectedColor.dataset.colorId;
+                    itemData.colorName = selectedColor.dataset.colorName;
+                }
+
+                // Find and collect data for the selected size
+                const selectedSize = itemElement.querySelector('.size-option.selected');
+                if (selectedSize) {
+                    itemData.sizeId = selectedSize.dataset.sizeId;
+                    itemData.sizeName = selectedSize.dataset.sizeName;
+                }
+
+                // Find and collect the selected quantity from the dropdown
+                const selectedQty = itemElement.querySelector('.item-qty').value;
+                if (selectedQty) {
+                    itemData.qty = selectedQty;
+                }
+
+                selectedItemsData.push(itemData);
             });
-            document.getElementById('selectedItemsInput').value = JSON.stringify(selected);
+
+            document.getElementById('selectedItemsInput').value = JSON.stringify(selectedItemsData);
         });
-        
     </script>
 @endsection
