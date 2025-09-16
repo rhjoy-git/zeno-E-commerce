@@ -142,7 +142,8 @@ class CartController extends Controller
                 'product' => function ($q) {
                     $q->where('status', 'active');
                 },
-                'variant.color', 'variant.size'
+                'variant.color',
+                'variant.size'
             ])
                 ->where('user_id', Auth::id())
                 ->get();
@@ -227,7 +228,6 @@ class CartController extends Controller
         return response()->json($colors);
     }
 
-
     public function update(Request $request, $item)
     {
         $request->validate([
@@ -248,7 +248,9 @@ class CartController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Cart updated successfully'
+            'message' => 'Cart updated successfully',
+            'cart_count' => $this->getCartCount()
+
         ]);
     }
 
