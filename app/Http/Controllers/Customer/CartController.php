@@ -21,8 +21,6 @@ class CartController extends Controller
         $request->validate([
             'product_id' => 'required|exists:products,id',
             'qty' => 'required|integer|min:1',
-            'color' => 'nullable|string|max:200',
-            'size' => 'nullable|string|max:200',
             'variant_id' => 'nullable|exists:product_variants,id'
         ]);
         // dd($request->all());
@@ -33,23 +31,21 @@ class CartController extends Controller
 
         $product = Product::findOrFail($request->product_id);
 
-        // Calculate price based on variant or product base price
+        // Initialize variables
         $price = $product->price;
-        if ($request->variant_id) {
-            $variant = ProductVariant::find($request->variant_id);
-            if ($variant) {
-                $price = $variant->price;
-            }
-        }
+        $size = null;
+        $color = null;
 
-        // Check if product is on sale
-        if ($product->sale_price && $product->sale_price < $price) {
-            $price = $product->sale_price;
+        if ($request->variant_id) {
+            $variant = ProductVariant::findOrFail($request->variant_id);
+            $price = $variant->price;
+            $size = $variant->size_id;
+            $color = $variant->color_id;
         }
 
         // For authenticated users
         if (Auth::check()) {
-            $cartItem = $this->addToDatabaseCart($request, $price);
+            $cartItem = $this->addToDatabaseCart($request, $price, $size, $color);
             return response()->json([
                 'success' => true,
                 'message' => '"' . $product->name . '" added to cart',
@@ -58,7 +54,7 @@ class CartController extends Controller
         }
 
         // For guests
-        $cartItem = $this->addToSessionCart($request, $product, $price);
+        $cartItem = $this->addToSessionCart($request, $product, $price, $color, $size);
         return response()->json([
             'success' => true,
             'message' => '"' . $product->name . '" added to cart',
@@ -66,7 +62,7 @@ class CartController extends Controller
         ]);
     }
 
-    private function addToDatabaseCart(Request $request, $price)
+    private function addToDatabaseCart(Request $request, $price, $size = null, $color = null)
     {
         $userId = Auth::id();
 
@@ -74,8 +70,6 @@ class CartController extends Controller
         $existingItem = ProductCart::where('user_id', $userId)
             ->where('product_id', $request->product_id)
             ->where('variant_id', $request->variant_id)
-            ->where('color', $request->color)
-            ->where('size', $request->size)
             ->first();
 
         if ($existingItem) {
@@ -90,18 +84,17 @@ class CartController extends Controller
             'user_id' => $userId,
             'product_id' => $request->product_id,
             'variant_id' => $request->variant_id,
-            'color' => $request->color,
-            'size' => $request->size,
+            'color' => $color,
+            'size' => $size,
             'qty' => $request->qty,
             'price' => $price
         ]);
     }
 
-    private function addToSessionCart(Request $request, $product, $price)
+    private function addToSessionCart(Request $request, $product, $price, $color = null, $size = null)
     {
         $cart = Session::get('cart', []);
-        $uniqueId = $this->generateCartItemId($request);
-
+        $uniqueId = $this->generateCartItemId($request->product_id, $request->variant_id, $color, $size);
         // Get product image safely
         $productImage = null;
         if ($product->images && $product->images->count() > 0) {
@@ -116,8 +109,8 @@ class CartController extends Controller
             $cart[$uniqueId] = [
                 'product_id' => $request->product_id,
                 'variant_id' => $request->variant_id,
-                'color' => $request->color,
-                'size' => $request->size,
+                'color' => $color,
+                'size' => $size,
                 'qty' => $request->qty,
                 'price' => $price,
                 'product_name' => $product->name,
@@ -130,13 +123,13 @@ class CartController extends Controller
         return $cart[$uniqueId];
     }
 
-    private function generateCartItemId(Request $request)
+    private function generateCartItemId($productId, $variantId, $color, $size)
     {
         return md5(implode('|', [
-            $request->product_id,
-            $request->variant_id,
-            $request->color,
-            $request->size
+            $productId,
+            $variantId,
+            $color,
+            $size
         ]));
     }
     public function index()
@@ -147,21 +140,18 @@ class CartController extends Controller
         if (Auth::check()) {
             $cartItems = ProductCart::with([
                 'product' => function ($q) {
-                    $q->where('status', 'active')
-                        ->with(['images', 'variants.size', 'variants.color']);
+                    $q->where('status', 'active');
                 },
-                'activeVariant',
-                'activeVariant.size',
-                'activeVariant.color'
+                'variant.color', 'variant.size'
             ])
                 ->where('user_id', Auth::id())
                 ->get();
-
+            // dd($cartItems);
             $totalItems = $cartItems->sum('qty');
         } else {
             $sessionCart = Session::get('cart', []);
             foreach ($sessionCart as $id => $item) {
-                $product = Product::with(['images', 'variants.size', 'variants.color'])->find($item['product_id']);
+                $product = Product::with(['primaryImage', 'variants.size', 'variants.color'])->find($item['product_id']);
                 if (!$product) continue;
 
                 $totalItems += $item['qty'];
@@ -237,7 +227,7 @@ class CartController extends Controller
         return response()->json($colors);
     }
 
-    
+
     public function update(Request $request, $item)
     {
         $request->validate([

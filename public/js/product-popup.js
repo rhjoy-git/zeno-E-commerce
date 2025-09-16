@@ -198,7 +198,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     // Store product info in Add to Cart button
                     popupAddToCartBtn.dataset.productId = data.id;
-                    popupAddToCartBtn.dataset.price = data.price;
 
                     // Show popup
                     popup.classList.remove("hidden");
@@ -278,8 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedVariantId = matchingVariant.id;
             // Update price if variant has different price
             if (matchingVariant.price) {
-                price.textContent = matchingVariant.price + " ৳";
-                popupAddToCartBtn.dataset.price = matchingVariant.price;
+                price.textContent = matchingVariant.price + " $";
             }
         } else {
             selectedVariantId = null;
@@ -307,7 +305,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // 🔹 Add to Cart from Popup
     popupAddToCartBtn.addEventListener("click", () => {
         const productId = popupAddToCartBtn.dataset.productId;
-        const price = popupAddToCartBtn.dataset.price;
         const qty = qtyInput.value;
 
         // Validate variant selection for products with variants
@@ -344,9 +341,6 @@ document.addEventListener("DOMContentLoaded", () => {
             body: JSON.stringify({
                 product_id: productId,
                 qty: qty,
-                price: price,
-                color: selectedColor ? selectedColor.name : null,
-                size: selectedSize ? selectedSize.name : null,
                 variant_id: selectedVariantId,
             }),
         })
