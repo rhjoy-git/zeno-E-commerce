@@ -10,6 +10,8 @@ use App\Models\ProductVariant;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
@@ -32,75 +34,70 @@ class CheckoutController extends Controller
 
     public function checkout(Request $request)
     {
-        $selectedItems = $request->input('selected_items', []);
+        try {
+            // Decode selected items safely
+            $selectedItems = json_decode($request->input('selected_items', '[]'), true);
 
-        if (empty($selectedItems)) {
-            return back()->withErrors(['error' => 'No items selected for checkout.']);
-        }
-
-        $cartItems = ProductCart::with(['product', 'variant'])
-            ->whereIn('id', $selectedItems)
-            ->where('user_id', Auth::id())
-            ->get();
-
-        // Check if valid items were found and return JSON error
-        if ($cartItems->isEmpty()) {
-            return back()->withErrors(['error' => 'No valid items found in your cart.']);
-        }
-
-        // Calculation logic remains the same
-        $orderTotal = 0;
-        $discountTotal = 0;
-
-        foreach ($cartItems as $cartItem) {
-            $price = $cartItem->variant
-                ? $cartItem->variant->price
-                : $cartItem->product->price;
-
-            $discountPrice = $cartItem->variant
-                ? $cartItem->variant->discount_price
-                : $cartItem->product->discount_price;
-
-            $finalPrice = $discountPrice ?: $price;
-
-            $orderTotal += $finalPrice * $cartItem->qty;
-
-            if ($discountPrice) {
-                $discountTotal += ($price - $discountPrice) * $cartItem->qty;
+            // Validation - must be array of integers
+            if (!is_array($selectedItems) || empty($selectedItems)) {
+                return redirect()->back()->withErrors(['cart' => 'No items selected for checkout.']);
             }
-        }
 
-        $vat = $orderTotal * 0.05;
-        $grandTotal = $orderTotal + $vat;
+            // Sanitize ids (force int, remove invalid)
+            $selectedItems = array_map('intval', $selectedItems);
 
-        // Create the order
-        $order = Order::create([
-            'user_id' => Auth::id(),
-            'subtotal' => $orderTotal,
-            'discount' => $discountTotal,
-            'vat' => $vat,
-            'grand_total' => $grandTotal,
-            'status' => 'pending'
-        ]);
+            // Retrieve only current user's cart items
+            $cartItems = ProductCart::with(['product', 'variant'])
+                ->whereIn('id', $selectedItems)
+                ->where('user_id', Auth::id())
+                ->get();
 
-        // Create order items
-        foreach ($cartItems as $item) {
-            $order->items()->create([
-                'product_id' => $item->product_id,
-                'variant_id' => $item->variant_id,
-                'qty' => $item->qty,
-                'price' => $item->variant ? $item->variant->price : $item->product->price,
-                'discount_price' => $item->variant ? $item->variant->discount_price : $item->product->discount_price,
+            if ($cartItems->isEmpty()) {
+                return redirect()->route('cart.index')
+                    ->withErrors(['cart' => 'Your selected items are invalid or not available.']);
+            }
+
+            // --- Calculation Logic ---
+            $subtotal = 0;
+            $discountTotal = 0;
+            $vatRate = 0.05;
+
+            foreach ($cartItems as $cartItem) {
+                $basePrice = $cartItem->variant ? $cartItem->variant->price : $cartItem->product->price;
+                $discountedPrice = $cartItem->variant ? $cartItem->variant->discount_price : $cartItem->product->discount_price;
+                $effectivePrice = $discountedPrice ?? $basePrice;
+
+                $itemDiscount = ($basePrice - $effectivePrice) * $cartItem->qty;
+
+                $subtotal += $effectivePrice * $cartItem->qty;
+                $discountTotal += $itemDiscount;
+            }
+
+            $taxAmount = $subtotal * $vatRate;
+            $grandTotal = $subtotal + $taxAmount;
+
+            // 🟢 Store checkout data in session for later confirmation
+            session([
+                'checkout' => [
+                    'items' => $cartItems->pluck('id')->toArray(),
+                    'subtotal' => $subtotal,
+                    'discount' => $discountTotal,
+                    'vat' => $taxAmount,
+                    'grand_total' => $grandTotal,
+                ],
             ]);
+            // dd($cartItems, $subtotal, $discountTotal, $taxAmount, $grandTotal);
+            return view('customer.checkout', compact('cartItems', 'subtotal', 'discountTotal', 'taxAmount', 'grandTotal'));
+        } catch (\Exception $e) {
+            Log::error('Checkout error: ' . $e->getMessage(), [
+                'userId' => Auth::id(),
+                'selectedItems' => $request->input('selected_items'),
+            ]);
+            return redirect()->route('cart.index')->withErrors(['checkout' => 'Something went wrong, please try again.']);
         }
-
-        // Instead of returning a view, return a JSON response with a redirect URL.
-        return response()->json([
-            'success' => true,
-            'message' => 'Checkout successful.',
-            'redirect_url' => route('customer.checkout', ['orderId' => $order->id])
-        ]);
     }
+
+
     /**
      * Cart update helper
      */

@@ -1,14 +1,6 @@
 @extends('layouts.master-layout')
 @section('title', 'Your Bag')
 
-@push('styles')
-    <style>
-        [x-cloak] {
-            display: none !important;
-        }
-    </style>
-@endpush
-
 @section('content')
     <div class="max-w-7xl mx-auto px-2 py-8">
         <h1 class="ms-6 text-4xl font-bold uppercase mb-2 font-megumi ">Your Bag <span
@@ -146,7 +138,8 @@
                     </div>
                 </div>
                 <div class="lg:w-[40%] xl:w-[42%] bg-white">
-                    <h1 class="text-2xl font-bold mb-4 uppercase ms-6  font-megumi ">Order Summary</h1>
+                    <h1 class="text-2xl font-bold mb-4 uppercase ms-6 font-megumi">Order Summary</h1>
+
                     <div class="px-6 pb-6">
                         <hr class="block lg:w-auto lg:h-[2px] lg:bg-gray-200 lg:border-none lg:mx-0">
                         <div class="space-y-3 my-4">
@@ -154,7 +147,7 @@
                                 <span>Order value</span>
                                 <span class="font-semibold" id="order-value-total">$0.00</span>
                             </div>
-                            <div class="flex justify-between">
+                            <div class="flex justify-between parentDiscount">
                                 <span>Discount</span>
                                 <span class="font-semibold text-green-600" id="total-discount">$0.00</span>
                             </div>
@@ -241,6 +234,7 @@
             // Find all order summary elements
             const orderValueTotalEl = document.getElementById('order-value-total');
             const totalDiscountEl = document.getElementById('total-discount');
+            const parentDiscount = document.querySelector('.parentDiscount');
             const vatAmountEl = document.getElementById('vat-amount');
             const totalPriceEl = document.getElementById('total-price');
 
@@ -273,11 +267,21 @@
                 let total = orderValue + vat;
 
                 // Update the HTML elements with new values
-                orderValueTotalEl.textContent = `$${orderValue.toFixed(2)}`;
-                totalDiscountEl.textContent = `- $${totalDiscount.toFixed(2)}`;
-                vatAmountEl.textContent = `$${vat.toFixed(2)}`;
-                totalPriceEl.textContent = `$${total.toFixed(2)}`;;
-
+                orderValueTotalEl.textContent =
+                    `$${orderValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                if (totalDiscount > 0) {
+                    totalDiscountEl.textContent =
+                        `- $${totalDiscount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    parentDiscount.classList.remove('hidden');
+                } else {
+                    if (!parentDiscount.classList.contains('hidden')) {
+                        parentDiscount.classList.add('hidden');
+                    }
+                }
+                vatAmountEl.textContent =
+                    `$${vat.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                totalPriceEl.textContent =
+                    `$${total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             }
 
             // ==================== Event Handlers ====================
@@ -346,7 +350,9 @@
                                 updateCartTotals();
                             }
                             // Update the main cart counter
-                            cartCounters.forEach(el => el.textContent = data.cart_count);
+                            document.querySelectorAll(".cart-counter").forEach((el) => {
+                                el.textContent = data.cart_count;
+                            });
                             if (data.cart_count === 0) {
                                 cartContainer.innerHTML = `<div class="flex-1 text-center py-12">
                                     <h2 class="text-3xl font-bold py-4">Your bag is empty</h2>

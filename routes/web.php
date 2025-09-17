@@ -10,6 +10,10 @@ use App\Http\Controllers\{
     TestingController
 };
 
+use App\Http\Controllers\Public\{
+    PolicyController,
+};
+
 use App\Http\Controllers\Auth\{
     LoginController,
     RegisterController,
@@ -57,10 +61,22 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/about-us', 'aboutUs')->name('about.us');
     Route::match(['get', 'post'], '/contact-us', 'contactUs')->name('contact.us');
 });
-// Delivery & Return Policy
-Route::get('/delivery-return-policy', function () {
-    return view('frontend.delivery-return-policy');
-})->name('delivery.return.policy');
+
+// Policy Routes
+Route::prefix('policies')->controller(PolicyController::class)->name('policies.')->group(function () {
+
+    Route::get('/privacy-policy', 'privacyPolicy')
+        ->name('privacy.policy');
+
+    Route::get('/shipping-policy', 'shippingPolicy')
+        ->name('shipping.policy');
+
+    Route::get('/exchange-policy', 'exchangePolicy')
+        ->name('exchange.policy');
+
+    Route::get('/terms-conditions', 'termsConditions')
+        ->name('terms-conditions.policy');
+});
 
 // Product Routes
 Route::controller(CustomerProductController::class)->group(function () {
