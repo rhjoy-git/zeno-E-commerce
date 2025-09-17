@@ -44,6 +44,7 @@ return new class extends Migration
             $table->string('tracking_number')->nullable();
             $table->string('tracking_url')->nullable();
             $table->unsignedBigInteger('user_id');
+            $table->string('guest_session_id')->nullable();
             $table->string('customer_email')->index();
             $table->string('customer_phone')->nullable();
             $table->string('customer_ip')->nullable();

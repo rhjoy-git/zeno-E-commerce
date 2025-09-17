@@ -10,6 +10,7 @@ use App\Models\ProductVariant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -131,20 +132,21 @@ class CartController extends Controller
         } else {
             $cart = Session::get('cart', []);
             $cartItems = collect();
-
+            // dd($cart);
             foreach ($cart as $item) {
                 $product = Product::find($item['product_id']);
                 $variant = $item['variant_id'] ? ProductVariant::find($item['variant_id']) : null;
 
                 $cartItems->push((object) [
                     'id'       => $item['uniqueId'],
+                    'product_id' => $item['product_id'],
                     'product'  => $product,
                     'variant'  => $variant,
+                    'variant_id'  => $item['variant_id'],
                     'qty' => $item['qty'],
                 ]);
+                $totalItems += $item['qty'];
             }
-
-            $totalItems += $item['qty'];
         }
 
         return view('customer.cart-item', compact('cartItems', 'totalItems'));
@@ -224,16 +226,18 @@ class CartController extends Controller
                     ProductCart::create([
                         'user_id'    => Auth::id(),
                         'product_id' => $item['product_id'],
-                        'variant_id' => $item['variant_id'],
-                        'qty'   => $item['qty'],
+                        'variant_id' => $item['variant_id'] ?? null,
+                        'qty'        => $item['qty'],
+                        'color'      => $item['color_id'] ?? null,
+                        'size'       => $item['size_id'] ?? null,
+                        'price'      => $item['price'],
                     ]);
                 }
             }
         });
 
         Session::forget('cart');
-
-        return response()->json(['success' => true, 'cart_count' => $this->getCartCount()]);
+        // return response()->json(['success' => true, 'cart_count' => $this->getCartCount()]);
     }
 
     public function getVariantPrice(Request $request)
@@ -273,6 +277,10 @@ class CartController extends Controller
         foreach ($cart as $item) {
             $count += $item['qty'];
         }
+        if ($count == 0 && empty($cart)) {
+            Session::forget('cart');
+        }
+
         return $count;
     }
 

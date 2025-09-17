@@ -32,6 +32,7 @@ class Order extends Model
         'tracking_number',
         'tracking_url',
         'user_id',
+        'guest_session_id',
         'customer_email',
         'customer_phone',
         'customer_ip',

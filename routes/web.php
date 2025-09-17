@@ -86,7 +86,7 @@ Route::prefix('products')->controller(CustomerProductController::class)->name('p
 });
 
 // Cart Routes
-Route::prefix('cart')->middleware('syncCart')->name('cart.')->controller(CartController::class)->group(function () {
+Route::prefix('cart')->name('cart.')->controller(CartController::class)->group(function () {
     Route::post('/add', 'addToCart')->name('add');
     Route::get('/items', 'index')->name('index');
     Route::post('/update/{item}', 'update')->name('update');
@@ -94,7 +94,12 @@ Route::prefix('cart')->middleware('syncCart')->name('cart.')->controller(CartCon
     Route::post('/sync', 'syncCart')->name('sync');
     Route::post('/get-variant-price', 'getVariantPrice')->name('get-variant-price');
 });
-
+// Checkout
+Route::controller(CheckoutController::class)->name('checkout.')->group(function () {
+    Route::post('/checkout', 'index')->name('index');
+    Route::post('/store', 'store')->name('store');
+    Route::post('/checkout/place-order', 'placeOrder')->name('placeOrder');
+});
 
 // ==================== AUTHENTICATION ROUTES ====================
 
@@ -158,13 +163,6 @@ Route::middleware(['auth', 'customer'])->prefix('customer')->name('customer.')->
 
     // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'getWishList'])->name('wishlist');
-
-    // Checkout
-    Route::controller(CheckoutController::class)->group(function () {
-        Route::post('/checkout', 'checkout')->name('checkout');
-        Route::post('/store', 'store')->name('checkout.store');
-        Route::post('/checkout/place-order', 'placeOrder')->name('checkout.placeOrder');
-    });
 });
 
 // ==================== ADMIN ROUTES ====================

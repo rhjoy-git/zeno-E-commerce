@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
 
 class CheckoutController extends Controller
 {
@@ -32,7 +34,7 @@ class CheckoutController extends Controller
     //     return view('customer.checkout', compact('cartItems'));
     // }
 
-    public function checkout(Request $request)
+    public function index(Request $request)
     {
         try {
             // Decode selected items safely
@@ -40,21 +42,43 @@ class CheckoutController extends Controller
 
             // Validation - must be array of integers
             if (!is_array($selectedItems) || empty($selectedItems)) {
-                return redirect()->back()->withErrors(['cart' => 'No items selected for checkout.']);
+                return redirect()->back()->with('warning', 'No items selected for checkout.');
             }
 
-            // Sanitize ids (force int, remove invalid)
-            $selectedItems = array_map('intval', $selectedItems);
+            if (Auth::check()) {
+                // Sanitize ids (force int, remove invalid)
+                $selectedItems = array_map('intval', $selectedItems);
 
-            // Retrieve only current user's cart items
-            $cartItems = ProductCart::with(['product', 'variant'])
-                ->whereIn('id', $selectedItems)
-                ->where('user_id', Auth::id())
-                ->get();
+                // Retrieve only current user's cart items
+                $cartItems = ProductCart::with(['product', 'variant'])
+                    ->whereIn('id', $selectedItems)
+                    ->where('user_id', Auth::id())
+                    ->get();
+            } else {
+                $cart = Session::get('cart', []);
+                $cartItems = collect();
+                // dd($cart);
+                foreach ($cart as $item) {
+                    if (in_array($item['uniqueId'], $selectedItems)) {
+                        $product = Product::find($item['product_id']);
+                        $variant = $item['variant_id'] ? ProductVariant::find($item['variant_id']) : null;
+
+                        $cartItems->push((object) [
+                            'id' => $item['uniqueId'],
+                            'product_id' => $item['product_id'],
+                            'product' => $product,
+                            'variant' => $variant,
+                            'variant_id' => $item['variant_id'],
+                            'qty' => $item['qty'],
+                        ]);
+                    }
+                }
+            }
+
 
             if ($cartItems->isEmpty()) {
                 return redirect()->route('cart.index')
-                    ->withErrors(['cart' => 'Your selected items are invalid or not available.']);
+                    ->with(['error', 'Your selected items are invalid or not available.']);
             }
 
             // --- Calculation Logic ---
@@ -92,7 +116,7 @@ class CheckoutController extends Controller
                 'userId' => Auth::id(),
                 'selectedItems' => $request->input('selected_items'),
             ]);
-            return redirect()->route('cart.index')->withErrors(['checkout' => 'Something went wrong, please try again.']);
+            return redirect()->route('cart.index')->withErrors(['error' => 'Something went wrong, please try again.']);
         }
     }
 
@@ -108,45 +132,52 @@ class CheckoutController extends Controller
             'payment'   => 'required|string|in:cod,bkash,mobile-banking,card',
         ]);
 
-
         // Retrieve the 'checkout' session data
         $checkout = session('checkout');
 
         // Retrieve all session data
-        $allSessionData = session()->all();
-
-        // Combine the data for clarity
-        $response = [
-            'checkout' => $checkout,
-            'all_session_data' => $allSessionData
-        ];
-
-        dd($response, $request->all());
-        
         if (empty($checkout) || empty($checkout['items']) || !is_array($checkout['items'])) {
-            return redirect()->route('cart.index')->withErrors(['checkout' => 'No items selected for checkout.']);
+            session()->forget('checkout');
+
+            return redirect()->route('cart.index')->with('warning', 'No items selected for checkout.');
         }
 
         // 3) Determine owner constraint (auth user or guest session)
-        $userId = Auth::id();
-        $sessionId = session()->getId();
+        $userId = Auth::id() ?? null;
+        $sessionId = session()->getId() ?? null;
 
-        // Sanitize ids
-        $selectedIds = array_map('intval', $checkout['items']);
+        // Check if the user is authenticated
+        if (Auth::check()) {
+            $selectedIds = array_map('intval', $checkout['items']);
+        } else {
+            $selectedIds = $checkout['items'];
+        }
 
         try {
-            // 4) Re-fetch ONLY the selected cart items that belong to this user/session
-            $cartQuery = ProductCart::with(['product', 'variant'])
-                ->whereIn('id', $selectedIds)
-                ->where(function ($q) use ($userId, $sessionId) {
-                    if ($userId) {
-                        $q->where('user_id', $userId);
-                    } else {
-                        $q->where('session_id', $sessionId);
-                    }
-                });
+            if (Auth::check()) {
+                $cartItems = ProductCart::with(['product', 'variant'])
+                    ->whereIn('id', $selectedIds)
+                    ->where('user_id', Auth::id())
+                    ->get();
+            } else {
+                $cart = Session::get('cart', []);
+                $cartItems = collect();
+                foreach ($cart as $item) {
+                    if (in_array($item['uniqueId'], $selectedIds)) {
+                        $product = Product::find($item['product_id']);
+                        $variant = $item['variant_id'] ? ProductVariant::find($item['variant_id']) : null;
 
-            $cartItems = $cartQuery->get();
+                        $cartItems->push((object) [
+                            'id' => $item['uniqueId'],
+                            'product_id' => $item['product_id'],
+                            'product' => $product,
+                            'variant' => $variant,
+                            'variant_id' => $item['variant_id'],
+                            'qty' => $item['qty'],
+                        ]);
+                    }
+                }
+            }
 
             // 5) Ensure all selected items were found
             if ($cartItems->count() !== count($selectedIds)) {
@@ -157,91 +188,140 @@ class CheckoutController extends Controller
                     'user_id' => $userId,
                     'session_id' => $sessionId,
                 ]);
-                return redirect()->route('cart.index')->withErrors(['checkout' => 'Some selected items are no longer available. Please check your cart.']);
+                session()->forget('checkout');
+
+                return redirect()->route('cart.index')->with('error', 'Some selected items are no longer available. Please check your cart.');
             }
 
             // 6) Server-side re-calculation and stock validation
             $subtotal = 0;
             $discountTotal = 0;
             $vatRate = 0.05;
-
+            // dd($cartItems);
             foreach ($cartItems as $item) {
+
                 $basePrice = $item->variant ? $item->variant->price : $item->product->price;
-                $discountPrice = $item->variant ? $item->variant->discount_price : $item->product->discount_price;
+                if (!$item->product->has_variants && $item->product->discount) {
+                    $discountPrice = $item->product->discount ? $item->product->discount_price : $item->product->price;
+                } else {
+                    $discountPrice = $basePrice;
+                }
                 $effectivePrice = $discountPrice ?? $basePrice;
 
                 // stock check
-                $availableQty = $item->variant ? ($item->variant->stock ?? 0) : ($item->product->stock ?? 0);
+                $availableQty = $item->variant ? ($item->variant->stock_quantity ?? 0) : ($item->product->stock_quantity ?? 0);
                 if ($item->qty > $availableQty) {
-                    return redirect()->route('cart.index')->withErrors([
-                        'stock' => "Insufficient stock for product: {$item->product->title}. Available: {$availableQty}, Requested: {$item->qty}"
-                    ]);
+                    session()->forget('checkout');
+
+                    return redirect()->route('cart.index')->with(
+                        'error',
+                        "Insufficient stock for product: {$item->product->title}. Available: {$availableQty}, Requested: {$item->qty}"
+                    );
                 }
 
                 $subtotal += $effectivePrice * $item->qty;
                 $discountTotal += ($basePrice - $effectivePrice) * $item->qty;
+                // var_dump(
+                //     "Item: ",
+                //     $item->id,
+                //     "Base Price:",
+                //     $basePrice,
+                //     $discountPrice,
+                //     $effectivePrice,
+                //     "Qty",
+                //     $item->qty,
+                //     "Sub-Total",
+                //     $subtotal,
+                //     "Dis-total",
+                //     $discountTotal
+                // );
             }
 
             $taxAmount = $subtotal * $vatRate;
             $grandTotal = $subtotal + $taxAmount;
 
-            // Optionally: compare server grandTotal with session('checkout.grand_total')
-            // If you want to detect price changes you can:
+            // Detect price changes you can:
+            // dd($checkout['grand_total'], $grandTotal, $taxAmount);
             if (isset($checkout['grand_total']) && abs($checkout['grand_total'] - $grandTotal) > 0.01) {
                 // Price changed since the user started checkout
                 session()->put('checkout.grand_total', $grandTotal);
-                // Either inform user or continue with updated price. Here we notify:
-                return redirect()->back()->withErrors(['price_change' => 'Product prices have changed. Please review the updated totals.']);
+                session()->forget('checkout');
+                return redirect()->back()->with(['warning' => 'Product prices have changed. Please review the updated totals.']);
             }
 
             // 7) Create order + items in transaction
             DB::beginTransaction();
 
+            // Generate a unique order number
+            $orderNumber = 'ORD-' . Str::upper(Str::random(8));
+
+            // Create the order
             $order = Order::create([
-                'user_id'      => $userId ?: null,
-                'guest_session_id' => $userId ? null : $sessionId,
-                'full_name'    => $validated['full_name'],
-                'phone'        => $validated['phone'],
-                'address'      => $validated['address'],
-                'apartment'    => $validated['apartment'] ?? null,
-                'city'         => $validated['city'],
-                'postcode'     => $validated['postcode'] ?? null,
+                'user_id' => $userId,
+                'guest_session_id' => $sessionId,
+                'order_number' => $orderNumber,
+                'customer_email' => Auth::check() ? Auth::user()->email : null,
+                'customer_phone' => $validated['phone'],
+                'full_name' => $validated['full_name'],
+                'address' => $validated['address'],
+                'apartment' => $validated['apartment'] ?? null,
+                'city' => $validated['city'],
+                'postcode' => $validated['postcode'] ?? null,
                 'payment_method' => $validated['payment'],
-                'subtotal'     => $subtotal,
-                'discount'     => $discountTotal,
-                'tax'          => $taxAmount,
-                'total'        => $grandTotal,
-                'status'       => 'pending',
+                'subtotal' => $subtotal,
+                'discount_amount' => $discountTotal,
+                'tax_amount' => $taxAmount,
+                'total' => $grandTotal,
+                'status' => 'pending',
             ]);
 
             foreach ($cartItems as $item) {
-                $priceUsed = $item->variant ? ($item->variant->discount_price ?? $item->variant->price) : ($item->product->discount_price ?? $item->product->price);
+                $basePrice = $item->variant ? $item->variant->price : $item->product->price;
 
-                $order->items()->create([
+                if (!$item->product->has_variants && $item->product->discount) {
+                    $effectivePrice = $item->product->discount ? $item->product->discount_price : $item->product->price;
+                } else {
+                    $effectivePrice = $basePrice;
+                }
+                $discountAmount = ($basePrice - $effectivePrice);
+                $taxAmountItem = ($effectivePrice * $vatRate);
+                $rowTotal = $effectivePrice * $item->qty;
+                $rowTotalInclTax = $rowTotal + $taxAmountItem;
+
+                $order->orderItems()->create([
                     'product_id' => $item->product_id,
-                    'variant_id' => $item->variant_id,
-                    'qty'        => $item->qty,
-                    'price'      => $priceUsed,
-                    'line_total' => $priceUsed * $item->qty,
+                    'product_variant_id' => $item->variant_id,
+                    'name' => $item->product->title,
+                    'sku' => $item->variant ? $item->variant->sku : $item->product->sku,
+                    'variant_color' => $item->variant ? $item->variant->color->name : null,
+                    'variant_size' => $item->variant ? $item->variant->size->name : null,
+                    'price' => $effectivePrice,
+                    'original_price' => $basePrice,
+                    'discount_amount' => $discountAmount,
+                    'tax_amount' => $taxAmountItem,
+                    'quantity' => $item->qty,
+                    'row_total' => $rowTotal,
+                    'row_total_incl_tax' => $rowTotalInclTax,
                 ]);
 
-                // optionally decrement stock (recommended)
+                // Decrement stock based on item type
                 if ($item->variant) {
-                    $item->variant->decrement('stock', $item->qty);
+                    $item->variant->decrement('stock_quantity', $item->qty);
                 } else {
-                    $item->product->decrement('stock', $item->qty);
+                    $item->product->decrement('stock_quantity', $item->qty);
                 }
             }
-
-            // 8) Remove only the selected cart rows (keep other cart rows intact)
-            $deleteQuery = ProductCart::whereIn('id', $selectedIds);
-            if ($userId) $deleteQuery->where('user_id', $userId);
-            else $deleteQuery->where('session_id', $sessionId);
-            $deleteQuery->delete();
+            
+            // Handle cart clearing after successful order creation
+            if (Auth::check()) {
+                ProductCart::whereIn('id', $selectedIds)->delete();
+            } else {
+                $cart = collect(Session::get('cart', []));
+                $remainingCart = $cart->whereNotIn('uniqueId', $selectedIds);
+                Session::put('cart', $remainingCart->values()->all());
+            }
 
             DB::commit();
-
-            // 9) Clear checkout session data
             session()->forget('checkout');
 
             // 10) Redirect based on payment method

@@ -32,7 +32,7 @@
                     <hr class="block lg:w-auto lg:h-[2px] lg:bg-gray-200 lg:border-none lg:mx-0">
                     <!-- Contact and Delivery Information -->
                     <h2 class="text-lg font-semibold py-4">Delivery Information</h2>
-                    <form action="{{ route('customer.checkout.store') }}" method="POST">
+                    <form action="{{ route('checkout.store') }}" method="POST">
                         @csrf
                         <div class="grid grid-cols-2 gap-4 mb-6 mt-3">
                             <div class="relative">
@@ -250,7 +250,7 @@
                                                 alt="{{ $cartItem->product->title }}">
                                         </div>
                                         <div class="flex-1 min-w-0 font-semibold">
-                                            <p class="font-semibold text-lg mb-1">{{ $cartItem->name }}</p>
+                                            <p class="font-semibold text-lg mb-1">{{ $cartItem->product->title }}</p>
 
                                             @if ($cartItem->product->has_variants)
                                                 <p class="text-sm text-gray-800 mb-1">COLOR:
