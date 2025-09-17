@@ -32,7 +32,7 @@
                     <hr class="block lg:w-auto lg:h-[2px] lg:bg-gray-200 lg:border-none lg:mx-0">
                     <!-- Contact and Delivery Information -->
                     <h2 class="text-lg font-semibold py-4">Delivery Information</h2>
-                    <form action="{{ route('customer.checkout.placeOrder') }}" method="POST">
+                    <form action="{{ route('customer.checkout.store') }}" method="POST">
                         @csrf
                         <div class="grid grid-cols-2 gap-4 mb-6 mt-3">
                             <div class="relative">
@@ -40,7 +40,7 @@
                                     class="absolute -top-3 left-4 bg-white px-1 text-black text-base font-medium">
                                     Full Name
                                 </label>
-                                <input type="text" id="full-name" placeholder="Full Name"
+                                <input type="text" name="full_name" id="full-name" placeholder="Full Name"
                                     class="w-full border border-[#8C8C8C] px-6 py-5 text-black text-base font-normal placeholder-[#8C8C8C] outline-none capitalize">
                             </div>
                             <div class="relative">
@@ -48,7 +48,7 @@
                                     class="absolute -top-3 left-4 bg-white px-1 text-black text-base font-medium">
                                     Phone*
                                 </label>
-                                <input type="tel" id="phone" placeholder="Enter your phone number"
+                                <input type="tel" name="phone" id="phone" placeholder="Enter your phone number"
                                     class="w-full border border-[#8C8C8C] px-6 py-5 text-black text-base font-normal placeholder-[#8C8C8C] outline-none"
                                     required>
                             </div>
@@ -59,7 +59,7 @@
                                 class="absolute -top-3 left-4 bg-white px-1 text-black text-base font-medium">
                                 Address
                             </label>
-                            <input type="text" id="address" placeholder="Address"
+                            <input type="text" name="address" id="address" placeholder="Address"
                                 class="w-full border border-[#8C8C8C] px-6 py-5 text-black text-base font-normal placeholder-[#8C8C8C] outline-none pr-10">
                         </div>
 
@@ -68,7 +68,7 @@
                                 class="absolute -top-3 left-4 bg-white px-1 text-black text-base font-medium">
                                 Apartment (optional)
                             </label>
-                            <input type="text" id="apartment" placeholder="Apartment, suite, etc. (optional)"
+                            <input type="text" name="apartment" id="apartment" placeholder="Apartment, suite, etc. (optional)"
                                 class="w-full border border-[#8C8C8C] px-6 py-5 text-black text-base font-normal placeholder-[#8C8C8C] outline-none">
                         </div>
 
@@ -78,7 +78,7 @@
                                     class="absolute -top-3 left-4 bg-white px-1 text-black text-base font-medium">
                                     City
                                 </label>
-                                <input type="text" id="city" placeholder="City"
+                                <input type="text" name="city" id="city" placeholder="City"
                                     class="w-full border border-[#8C8C8C] px-6 py-5 text-black text-base font-normal placeholder-[#8C8C8C] outline-none">
                             </div>
                             <div class="relative">
@@ -86,7 +86,7 @@
                                     class="absolute -top-3 left-4 bg-white px-1 text-black text-base font-medium">
                                     Postcode (optional)
                                 </label>
-                                <input type="text" id="postcode" placeholder="Postcode (optional)"
+                                <input type="text" name="postcode" id="postcode" placeholder="Postcode (optional)"
                                     class="w-full border border-[#8C8C8C] px-6 py-5 text-black text-base font-normal placeholder-[#8C8C8C] outline-none">
                             </div>
                         </div>
@@ -123,7 +123,7 @@
                         <!-- Terms and Conditions -->
                         <div class="mb-8 mt-10">
                             <div class="flex items-start">
-                                <input type="checkbox" id="same-address"
+                                <input name="same-address" type="checkbox" id="same-address"
                                     class="mt-1 mr-3 w-5 h-5 border border-[#8C8C8C] appearance-none checked:bg-black checked:border-transparent focus:offset-0 focus:outline-none focus:ring-0"
                                     checked>
                                 <label for="same-address" class="text-lg">Billing and delivery address are the same</label>
@@ -144,6 +144,7 @@
                             Complete Purchase
                         </button>
                     </form>
+
                     <div class="flex items-center justify-start">
                         <svg width="18" height="18" viewBox="0 0 16 16" fill="none"
                             xmlns="http://www.w3.org/2000/svg">

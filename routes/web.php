@@ -79,10 +79,10 @@ Route::prefix('policies')->controller(PolicyController::class)->name('policies.'
 });
 
 // Product Routes
-Route::controller(CustomerProductController::class)->group(function () {
-    Route::get('/products', 'index')->name('products.list');
-    Route::get('/products/{product}', 'show')->name('products.show');
-    Route::post('/products/variants', 'getVariants')->name('products.variants');
+Route::prefix('products')->controller(CustomerProductController::class)->name('products.')->group(function () {
+    Route::get('/', 'index')->name('list');
+    Route::get('/{product}', 'show')->name('show');
+    Route::post('/variants', 'getVariants')->name('variants');
 });
 
 // Cart Routes
@@ -92,10 +92,9 @@ Route::prefix('cart')->middleware('syncCart')->name('cart.')->controller(CartCon
     Route::post('/update/{item}', 'update')->name('update');
     Route::post('/remove/{item}', 'remove')->name('remove');
     Route::post('/sync', 'syncCart')->name('sync');
-    Route::post('/get-sizes', 'getSizes')->name('get-sizes');
-    Route::post('/get-colors', 'getColors')->name('get-colors');
     Route::post('/get-variant-price', 'getVariantPrice')->name('get-variant-price');
 });
+
 
 // ==================== AUTHENTICATION ROUTES ====================
 
@@ -163,6 +162,7 @@ Route::middleware(['auth', 'customer'])->prefix('customer')->name('customer.')->
     // Checkout
     Route::controller(CheckoutController::class)->group(function () {
         Route::post('/checkout', 'checkout')->name('checkout');
+        Route::post('/store', 'store')->name('checkout.store');
         Route::post('/checkout/place-order', 'placeOrder')->name('checkout.placeOrder');
     });
 });
