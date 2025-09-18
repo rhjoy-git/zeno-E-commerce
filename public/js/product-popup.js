@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const features = document.getElementById("popup-features");
     const qtyInput = document.getElementById("popup-quantity");
     const popupAddToCartBtn = document.getElementById("popup-add-to-cart");
+    const maxChars = 80;
 
     let selectedColor = null;
     let selectedSize = null;
@@ -61,8 +62,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     // 🔹 Populate popup
                     title.textContent = data.title;
-                    description.textContent = data.short_description || "";
-                    price.textContent = data.price + " $";
+                    const text = data.short_description || "";
+                    description.textContent = text.length > maxChars ? text.slice(0, maxChars) + "…" : text;
+                    if (data.discount_price != null) {
+                        price.textContent = "$" + data.discount_price;
+
+                        const original = document.createElement("span");
+                        original.className = "ml-2 text-gray-700 text-sm line-through";
+                        original.textContent = "$" + data.price;
+
+                        price.appendChild(original);
+                    } else {
+                        price.textContent = "$" + data.price;
+                    }
 
                     // 🔹 Images
                     thumbnailsContainer.innerHTML = "";
@@ -100,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             colors.forEach((c) => {
                                 const btn = document.createElement("button");
                                 btn.className =
-                                    "w-10 h-10 border-2 border-gray-300 rounded-full";
+                                    "w-7 h-7 border-2 border-gray-300 rounded-full";
                                 btn.style.background = c.color_hex;
                                 btn.title = c.color_name;
                                 btn.dataset.colorId = c.color_id;
@@ -158,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             sizes.forEach((s) => {
                                 const btn = document.createElement("button");
                                 btn.className =
-                                    "px-3 py-2 border-2 border-gray-300 text-sm font-medium";
+                                    "px-1 py-1 border-2 border-gray-300 text-sm font-medium";
                                 btn.textContent = s.size_name;
                                 btn.dataset.sizeId = s.size_id;
                                 btn.dataset.sizeName = s.size_name;

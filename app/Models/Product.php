@@ -115,6 +115,12 @@ class Product extends Model
             : $this->price;
     }
 
+    public function getImagePathAttribute()
+    {
+        return $this->primaryImage
+            ? $this->primaryImage->image_path
+            : 'images/products/default.jpg';
+    }
     public function availableSizes()
     {
         return $this->hasManyThrough(
@@ -144,6 +150,8 @@ class Product extends Model
             ->select('colors.*')
             ->distinct();
     }
+
+
     protected static function booted()
     {
         static::creating(function ($product) {

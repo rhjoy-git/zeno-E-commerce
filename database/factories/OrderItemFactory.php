@@ -29,10 +29,8 @@ class OrderItemFactory extends Factory
             'name' => $product->title,
             'sku' => $variant->sku ?? $product->sku,
             'description' => $product->short_description,
-            'variant_options' => json_encode(array_filter([
-                'color' => $variant->color ? $variant->color->name : null,
-                'size' => $variant->size ? $variant->size->name : null,
-            ])),
+            'variant_color' => $variant->color ? $variant->color->name : null,
+            'variant_size' => $variant->size ? $variant->size->name : null,
             'price' => $price,
             'original_price' => $price,
             'discount_amount' => $discount_amount,

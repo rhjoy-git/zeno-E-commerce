@@ -102,6 +102,7 @@ class ProductController extends Controller
                 'id' => $product->id,
                 'title' => $product->title,
                 'price' => $product->price,
+                'discount_price' => $product->discount ? $product->discount_price : null,
                 'has_variants' => $product->has_variants,
                 'short_description' => $product->short_description,
                 'images' => $product->images->map(function ($image) {

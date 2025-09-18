@@ -45,7 +45,7 @@ class OrderItem extends Model
         'weight' => 'decimal:2',
         'volume' => 'decimal:2',
         'fulfillment_status' => 'string',
-        'variant_options' => 'array',
+      
     ];
     public function order()
     {
